@@ -23,19 +23,19 @@ export const ACTION_TYPES = [
 ] as const;
 
 export const phaseSchema = z.enum(PHASES);
-const colorSchema = z.enum(COLORS);
-const sizeSchema = z.enum(["sm", "md", "lg", "title"]);
+export const colorSchema = z.enum(COLORS);
+export const sizeSchema = z.enum(["sm", "md", "lg", "title"]);
 
-const idSchema = z.string().regex(/^[A-Za-z][A-Za-z0-9_-]{0,31}$/);
+export const idSchema = z.string().regex(/^[A-Za-z][A-Za-z0-9_-]{0,31}$/);
 /** An element id, optionally with an array cell index, e.g. `arr` or `arr[3]`. */
-const refSchema = z.string().regex(/^[A-Za-z][A-Za-z0-9_-]{0,31}(\[\d{1,2}\])?$/);
+export const refSchema = z.string().regex(/^[A-Za-z][A-Za-z0-9_-]{0,31}(\[\d{1,2}\])?$/);
 /** Where in the owning segment an action fires: its start, its end, or a `[[mN]]` marker. */
 export const anchorSchema = z.string().regex(/^(start|end|m\d{1,3})$/);
 
-const xSchema = z.number().min(0).max(BOARD_WIDTH);
-const ySchema = z.number().min(0).max(BOARD_HEIGHT);
-const pointSchema = z.object({ x: xSchema, y: ySchema });
-const boardText = z.string().min(1).max(80);
+export const xSchema = z.number().min(0).max(BOARD_WIDTH);
+export const ySchema = z.number().min(0).max(BOARD_HEIGHT);
+export const pointSchema = z.object({ x: xSchema, y: ySchema });
+export const boardText = z.string().min(1).max(80);
 
 const base = {
   id: idSchema,

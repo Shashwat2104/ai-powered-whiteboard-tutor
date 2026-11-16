@@ -16,6 +16,8 @@ import { ProgressSteps, type GenerationStage } from "./status/ProgressSteps";
 import { Whiteboard } from "./whiteboard/Whiteboard";
 import { PlayerControls } from "./player/PlayerControls";
 import { KnowledgeCheck } from "./check/KnowledgeCheck";
+import { FollowUpPanel } from "./chat/FollowUpPanel";
+import type { LessonContext } from "@/lib/followup/schema";
 
 const EMPTY_BOARD: BoardState = {
   sceneId: "",
@@ -167,6 +169,23 @@ export function LessonApp() {
     }));
   }, [timeline, lesson]);
 
+  const lessonContext = useMemo<LessonContext | null>(() => {
+    if (!lesson) return null;
+    return {
+      lessonId: lesson.id,
+      topic: lesson.topic,
+      objective: lesson.objective,
+      difficulty: lesson.difficulty,
+      transcript: lesson.segments.map((s) => ({
+        segmentId: s.id,
+        sceneId: lesson.scenes.find((sc) => sc.segmentIds.includes(s.id))?.id ?? "",
+        text: s.text,
+      })),
+      scenes: lesson.scenes.map((sc) => ({ id: sc.id, title: sc.title })),
+      recap: lesson.recap.keyPoints,
+    };
+  }, [lesson]);
+
   return (
     <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto py-6 px-4 sm:px-6">
       {/* Hidden Audio Element for Lesson Narration Clock */}
@@ -219,6 +238,16 @@ export function LessonApp() {
           <KnowledgeCheck
             checks={lesson.knowledgeChecks}
             onSeekScene={handleSeekScene}
+          />
+        </div>
+      )}
+
+      {/* Follow-up Questions Panel */}
+      {lesson && lessonContext && (
+        <div className="mt-4" data-testid="followup-section">
+          <FollowUpPanel
+            lessonContext={lessonContext}
+            onJumpToScene={handleSeekScene}
           />
         </div>
       )}
