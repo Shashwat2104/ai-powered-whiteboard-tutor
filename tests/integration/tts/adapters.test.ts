@@ -1,3 +1,4 @@
+import { generateKeyPairSync } from "node:crypto";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 import { encodeWavBytes } from "@/lib/audio/wav";
@@ -133,5 +134,61 @@ describe("GoogleSynth", () => {
   it("treats a response with no audio as a failure", async () => {
     server.use(http.post(GOOGLE, () => HttpResponse.json({})));
     await expectKind(google().synthesize({ text: "Hi" }), "failed");
+  });
+});
+
+const TOKEN_URI = "https://oauth2.example.test/token";
+const privateKey = generateKeyPairSync("rsa", { modulusLength: 2048 }).privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+const account = (email: string) => ({ client_email: email, private_key: privateKey, token_uri: TOKEN_URI, project_id: "demo-project" });
+const speech = () => HttpResponse.json({ audioContent: b64(encodeWavBytes(tone(24000))), timepoints: [] });
+
+describe("GoogleSynth with a service account", () => {
+  it("signs a token request and sends the bearer token with the project header", async () => {
+    let grant: URLSearchParams | undefined;
+    let headers: { auth: string | null; project: string | null; key: string | null } | undefined;
+    server.use(
+      http.post(TOKEN_URI, async ({ request }) => {
+        grant = new URLSearchParams(await request.text());
+        return HttpResponse.json({ access_token: "ya29.test", expires_in: 3600 });
+      }),
+      http.post(GOOGLE, ({ request }) => {
+        headers = { auth: request.headers.get("authorization"), project: request.headers.get("x-goog-user-project"), key: request.headers.get("x-goog-api-key") };
+        return speech();
+      }),
+    );
+    await new GoogleSynth({ account: account("signs@example.test"), voice: "en-US-Neural2-D" }).synthesize({ text: "Hi" });
+
+    expect(grant?.get("grant_type")).toBe("urn:ietf:params:oauth:grant-type:jwt-bearer");
+    const [header, claims, signature] = (grant?.get("assertion") ?? "").split(".");
+    expect(JSON.parse(Buffer.from(header ?? "", "base64url").toString())).toEqual({ alg: "RS256", typ: "JWT" });
+    expect(JSON.parse(Buffer.from(claims ?? "", "base64url").toString())).toMatchObject({
+      iss: "signs@example.test",
+      aud: TOKEN_URI,
+      scope: "https://www.googleapis.com/auth/cloud-platform",
+    });
+    expect(signature).toBeTruthy();
+    expect(headers).toEqual({ auth: "Bearer ya29.test", project: "demo-project", key: null });
+  });
+
+  it("reuses a token until it is close to expiry", async () => {
+    let tokenCalls = 0;
+    server.use(
+      http.post(TOKEN_URI, () => {
+        tokenCalls += 1;
+        return HttpResponse.json({ access_token: "ya29.cached", expires_in: 3600 });
+      }),
+      http.post(GOOGLE, speech),
+    );
+    const synth = new GoogleSynth({ account: account("cache@example.test"), voice: "en-US-Neural2-D" });
+    await synth.synthesize({ text: "One" });
+    await synth.synthesize({ text: "Two" });
+    expect(tokenCalls).toBe(1);
+  });
+
+  it("maps a rejected credential to a failure and an unreachable token endpoint to a server error", async () => {
+    server.use(http.post(TOKEN_URI, () => HttpResponse.json({ error: "invalid_grant" }, { status: 400 })));
+    await expectKind(new GoogleSynth({ account: account("rejected@example.test"), voice: "v" }).synthesize({ text: "Hi" }), "failed");
+    server.use(http.post(TOKEN_URI, () => HttpResponse.error()));
+    await expectKind(new GoogleSynth({ account: account("offline@example.test"), voice: "v" }).synthesize({ text: "Hi" }), "server");
   });
 });

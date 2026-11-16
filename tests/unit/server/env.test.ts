@@ -51,4 +51,16 @@ describe("parseEnv", () => {
     const env = parseEnv({ ...base, GOOGLE_TTS_API_KEY: "real", ELEVENLABS_API_KEY: "your-elevenlabs-key-here" });
     expect(configuredTts(env)).toEqual(["google"]);
   });
+
+  it("accepts a base64 service account as the Google voice credential", () => {
+    const key = { client_email: "a@b.test", private_key: "k", token_uri: "https://oauth2.example.test/token", project_id: "p" };
+    const encoded = Buffer.from(JSON.stringify(key)).toString("base64");
+    expect(configuredTts(parseEnv({ ...base, GOOGLE_TTS_CREDENTIALS_B64: encoded }))).toEqual(["google"]);
+  });
+
+  it("names the variable when the service account is not usable", () => {
+    expect(() => parseEnv({ ...base, GOOGLE_TTS_CREDENTIALS_B64: "not-base64-json" })).toThrow(/GOOGLE_TTS_CREDENTIALS_B64/);
+    const missingKey = Buffer.from(JSON.stringify({ client_email: "a@b.test" })).toString("base64");
+    expect(() => parseEnv({ ...base, GOOGLE_TTS_CREDENTIALS_B64: missingKey })).toThrow(/private_key/);
+  });
 });

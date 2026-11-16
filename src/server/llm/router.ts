@@ -62,7 +62,7 @@ export async function generateWithFallback<T>(
         });
         const issues = request.validate?.(result.data) ?? [];
         if (issues.length === 0) return { data: result.data, provider: provider.provider, model: result.model, attempts: attempt };
-        log("warn", "lesson failed validation", { provider: provider.provider, attempt, issues: issues.length });
+        log("warn", "lesson failed validation", { provider: provider.provider, attempt, issues: issues.length, details: issues });
         messages = [
           ...messages,
           { role: "assistant", content: result.raw },
@@ -72,7 +72,10 @@ export async function generateWithFallback<T>(
         if (!(error instanceof LlmError)) throw error;
         log("warn", "provider failed", { provider: provider.provider, kind: error.kind, attempt });
         if (error.kind !== "invalid_output") break;
-        messages = [...messages, { role: "user", content: "That reply was not valid JSON for the schema. Reply again with only the JSON object." }];
+        messages = [
+          ...messages,
+          { role: "user", content: `That reply was not valid JSON for the schema (${error.message}). Reply again with only the JSON object.` },
+        ];
       }
     }
   }

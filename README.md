@@ -96,6 +96,7 @@ An educational platform that transforms any topic into a 2-minute interactive, s
 | `ELEVENLABS_API_KEY` | Recommended | API key for ElevenLabs speech synthesis (primary TTS). | `eleven-...` |
 | `ELEVENLABS_VOICE_ID` | Optional | Default ElevenLabs voice ID. | `21m00Tcm4TlvDq8ikWAM` |
 | `GOOGLE_TTS_API_KEY` | Optional | Google Cloud TTS API key (fallback TTS). | `AIzaSy...` |
+| `GOOGLE_TTS_CREDENTIALS_B64` | Optional | Service-account key file, base64-encoded. Used instead of `GOOGLE_TTS_API_KEY` when set. | `eyJ0eXBlIjoi...` |
 | `NARRATION_TOKEN_SECRET` | **Required** | Secret key (min 32 chars) for HMAC narration authorization tokens. | Generated string |
 | `RATE_LIMIT_LESSON_PER_10MIN` | Optional | Max lesson requests per IP per 10 minutes. | `5` |
 | `RATE_LIMIT_NARRATION_PER_10MIN` | Optional | Max narration requests per IP per 10 minutes. | `60` |

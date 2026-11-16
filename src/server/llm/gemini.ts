@@ -1,10 +1,14 @@
 import "server-only";
-import { ApiError, GoogleGenAI } from "@google/genai";
+import { ApiError, GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { z } from "zod";
-import { LlmError, type GenerateRequest, type GenerateResult, type StructuredModel } from "./types";
+import { LlmError, type Effort, type GenerateRequest, type GenerateResult, type StructuredModel } from "./types";
 import { sanitizeSchema } from "./sanitize-schema";
 
 const DEFAULT_MAX_TOKENS = 16_000;
+/** How much of Gemini's error text is kept, so a 400 says why without flooding the logs. */
+const MAX_ERROR_DETAIL_CHARS = 300;
+/** Schema problems named back to the model so its repair targets the right fields. */
+const MAX_SCHEMA_ISSUES = 5;
 
 export interface GeminiConfig {
   apiKey: string;
@@ -29,6 +33,7 @@ export class GeminiModel implements StructuredModel {
           responseMimeType: "application/json",
           responseJsonSchema: sanitizeSchema(z.toJSONSchema(request.schema), "gemini"),
           maxOutputTokens: request.maxTokens ?? DEFAULT_MAX_TOKENS,
+          thinkingConfig: { thinkingLevel: thinkingLevelFor(request.effort, this.config.model) },
           abortSignal: AbortSignal.timeout(request.timeoutMs),
         },
       });
@@ -44,9 +49,25 @@ export class GeminiModel implements StructuredModel {
       throw new LlmError("invalid_output", "Reply was not valid JSON", "gemini");
     }
     const parsed = request.schema.safeParse(json);
-    if (!parsed.success) throw new LlmError("invalid_output", parsed.error.issues[0]?.message ?? "Schema mismatch", "gemini");
+    if (!parsed.success) {
+      const detail = parsed.error.issues
+        .slice(0, MAX_SCHEMA_ISSUES)
+        .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+        .join("; ");
+      throw new LlmError("invalid_output", detail || "Schema mismatch", "gemini");
+    }
     return { data: parsed.data, raw: text, model: this.config.model };
   }
+}
+
+/**
+ * Gemini 3 thinks at HIGH by default, which can pass the per-call timeout. Map the request effort
+ * to a thinking level instead. MEDIUM exists only on Flash models, so other models use LOW.
+ */
+export function thinkingLevelFor(effort: Effort, model: string): ThinkingLevel {
+  if (effort === "high") return ThinkingLevel.HIGH;
+  if (effort === "medium" && /flash/i.test(model)) return ThinkingLevel.MEDIUM;
+  return ThinkingLevel.LOW;
 }
 
 export function toLlmError(error: unknown): LlmError {
@@ -56,8 +77,9 @@ export function toLlmError(error: unknown): LlmError {
   }
   if (error instanceof ApiError) {
     if (error.status === 429) return new LlmError("rate_limited", "Rate limited", "gemini");
-    if (error.status === 401 || error.status === 403) return new LlmError("config", "Gemini key was rejected", "gemini");
-    return new LlmError("server", `Gemini error ${error.status}`, "gemini");
+    const keyRejected = error.status === 401 || error.status === 403 || error.message.includes("API_KEY_INVALID");
+    if (keyRejected) return new LlmError("config", "Gemini key was rejected", "gemini");
+    return new LlmError("server", `Gemini error ${error.status}: ${error.message.slice(0, MAX_ERROR_DETAIL_CHARS)}`, "gemini");
   }
   return new LlmError("server", error instanceof Error ? error.message : "Gemini failed", "gemini");
 }

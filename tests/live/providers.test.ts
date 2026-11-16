@@ -6,7 +6,7 @@ import { loadSynth } from "@/server/tts";
 const hasAnthropic = !!process.env.ANTHROPIC_API_KEY;
 const hasGemini = !!process.env.GEMINI_API_KEY;
 const hasElevenLabs = !!process.env.ELEVENLABS_API_KEY;
-const hasGoogleTts = !!process.env.GOOGLE_TTS_API_KEY;
+const hasGoogleTts = !!(process.env.GOOGLE_TTS_API_KEY || process.env.GOOGLE_TTS_CREDENTIALS_B64);
 
 describe("Live Provider Verification", () => {
   describe("T073: LLM Schema Acceptance (K1)", () => {

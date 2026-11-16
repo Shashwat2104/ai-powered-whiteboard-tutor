@@ -2,16 +2,14 @@ import "server-only";
 import { SAMPLE_RATE, bytesFromBase64, parseWav } from "@/lib/audio/wav";
 import { extractMarkers } from "@/lib/lesson/markers";
 import { estimateMarks } from "./alignment";
+import { getAccessToken, type ServiceAccount } from "./google-auth";
 import { toSsml } from "./ssml";
 import { TtsError, type Mark, type SpeechSynth, type SynthesisResult, type SynthesizeInput } from "./types";
 
 const ENDPOINT = "https://texttospeech.googleapis.com/v1beta1/text:synthesize";
 const TIMEOUT_MS = 20_000;
 
-export interface GoogleTtsConfig {
-  apiKey: string;
-  voice: string;
-}
+export type GoogleTtsConfig = ({ apiKey: string } | { account: ServiceAccount }) & { voice: string };
 
 interface ApiResponse {
   audioContent?: string;
@@ -30,13 +28,20 @@ export class GoogleSynth implements SpeechSynth {
 
   constructor(private readonly config: GoogleTtsConfig) {}
 
+  private async authHeaders(): Promise<Record<string, string>> {
+    if ("apiKey" in this.config) return { "x-goog-api-key": this.config.apiKey };
+    const token = await getAccessToken(this.config.account);
+    return { authorization: `Bearer ${token}`, "x-goog-user-project": this.config.account.project_id };
+  }
+
   async synthesize(input: SynthesizeInput): Promise<SynthesisResult> {
     const { spokenText, marks } = extractMarkers(input.text);
+    const auth = await this.authHeaders();
     let res: Response;
     try {
       res = await fetch(ENDPOINT, {
         method: "POST",
-        headers: { "x-goog-api-key": this.config.apiKey, "content-type": "application/json" },
+        headers: { ...auth, "content-type": "application/json" },
         body: JSON.stringify({
           input: { ssml: toSsml(input.text) },
           voice: { languageCode: "en-US", name: this.config.voice },

@@ -1,5 +1,6 @@
 import "server-only";
 import { z } from "zod";
+import { parseServiceAccount } from "./tts/google-auth";
 
 export type LlmProvider = "anthropic" | "gemini";
 export type TtsProvider = "elevenlabs" | "google";
@@ -35,6 +36,7 @@ const envSchema = z.object({
   ELEVENLABS_MODEL_ID: z.string().min(1).default("eleven_flash_v2_5"),
   ELEVENLABS_CONCURRENCY: positiveInt(2),
   GOOGLE_TTS_API_KEY: optionalKey,
+  GOOGLE_TTS_CREDENTIALS_B64: optionalKey,
   GOOGLE_TTS_VOICE: z.string().min(1).default("en-US-Neural2-D"),
   TTS_PROVIDER_ORDER: csvOf(["elevenlabs", "google"], "elevenlabs,google"),
   NARRATION_TOKEN_SECRET: z.string().default(""),
@@ -77,6 +79,13 @@ export function parseEnv(source: Record<string, string | undefined>): Env {
   if (!testProviders && !env.ANTHROPIC_API_KEY && !env.GEMINI_API_KEY) {
     throw new EnvError("Set ANTHROPIC_API_KEY or GEMINI_API_KEY");
   }
+  if (env.GOOGLE_TTS_CREDENTIALS_B64) {
+    try {
+      parseServiceAccount(env.GOOGLE_TTS_CREDENTIALS_B64);
+    } catch (error) {
+      throw new EnvError(`Invalid environment variable GOOGLE_TTS_CREDENTIALS_B64: ${error instanceof Error ? error.message : "invalid"}`);
+    }
+  }
   return { ...env, testProviders };
 }
 
@@ -99,6 +108,6 @@ export function configuredLlm(env: Env): LlmProvider[] {
 
 /** TTS providers to try, in order. */
 export function configuredTts(env: Env): TtsProvider[] {
-  const hasKey: Record<TtsProvider, boolean> = { elevenlabs: Boolean(env.ELEVENLABS_API_KEY), google: Boolean(env.GOOGLE_TTS_API_KEY) };
+  const hasKey: Record<TtsProvider, boolean> = { elevenlabs: Boolean(env.ELEVENLABS_API_KEY), google: Boolean(env.GOOGLE_TTS_API_KEY || env.GOOGLE_TTS_CREDENTIALS_B64) };
   return env.TTS_PROVIDER_ORDER.filter((p) => env.testProviders || hasKey[p]);
 }
