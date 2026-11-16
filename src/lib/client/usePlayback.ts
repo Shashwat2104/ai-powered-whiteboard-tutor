@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useRef, useCallback } from "react";
+import { useSyncExternalStore, useRef, useCallback, useEffect } from "react";
 import { PlaybackController } from "../playback/controller";
 import { AudioClock, VirtualClock } from "../playback/clock";
 
@@ -44,6 +44,20 @@ export function usePlayback(controller: PlaybackController) {
     },
     [controller]
   );
+
+  // Handle visibilitychange to re-sync immediately on tab return with no animation catchup
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        controller.tick();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [controller]);
 
   return {
     snapshot,
