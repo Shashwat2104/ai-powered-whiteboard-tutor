@@ -31,7 +31,7 @@ const envSchema = z.object({
   GEMINI_MODEL: z.string().min(1).default("gemini-flash-latest"),
   LLM_PROVIDER_ORDER: csvOf(["anthropic", "gemini"], "anthropic,gemini"),
   ELEVENLABS_API_KEY: optionalKey,
-  ELEVENLABS_VOICE_ID: z.string().min(1).default("21m00Tcm4TlvDq8ikWAM"),
+  ELEVENLABS_VOICE_ID: z.string().min(1).default("JBFqnCBsd6RMkjVDRZzb"),
   ELEVENLABS_MODEL_ID: z.string().min(1).default("eleven_flash_v2_5"),
   ELEVENLABS_CONCURRENCY: positiveInt(2),
   GOOGLE_TTS_API_KEY: optionalKey,

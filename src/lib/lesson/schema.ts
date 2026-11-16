@@ -179,6 +179,19 @@ export const lessonDraftSchema = z.object({
   knowledgeChecks: z.array(knowledgeCheckSchema).min(1).max(3),
 });
 
+/** A lesson without the status field; the model returns it inside an envelope. */
+export const lessonBodySchema = lessonDraftSchema.omit({ status: true });
+
+/**
+ * What the model is asked to return: a flat object (no union at the root, which some providers
+ * reject) holding either a lesson or a short reason for declining the topic.
+ */
+export const lessonEnvelopeSchema = z.object({
+  status: z.enum(["ok", "rejected"]),
+  reason: z.string().min(1).max(300).optional(),
+  lesson: lessonBodySchema.optional(),
+});
+
 export const lessonRejectedSchema = z.object({
   status: z.literal("rejected"),
   reason: z.string().min(1).max(300),
