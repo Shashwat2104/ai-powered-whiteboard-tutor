@@ -40,5 +40,33 @@ function lessonPayload(topic: string, broken: boolean): unknown {
 
 function followupPayload(prompt: string): unknown {
   const asked = /<question>([\s\S]*?)<\/question>/.exec(prompt)?.[1]?.trim() ?? "your question";
-  return { answer: `Good question. In this lesson, the key idea behind "${asked.slice(0, 80)}" is that each check removes half of what is left.`, sceneRef: "sc2" };
+
+  let sceneRef: string | undefined = "sc2";
+  if (asked.includes("trigger_unknown_scene")) {
+    sceneRef = "scene_does_not_exist";
+  }
+
+  let illustration: unknown = undefined;
+  if (asked.includes("trigger_valid_illustration")) {
+    illustration = {
+      durationSec: 4,
+      actions: [
+        { id: "ill_w1", type: "write", at: "start", x: 100, y: 100, text: "Mini illustration", size: "md" },
+      ],
+    };
+  } else if (asked.includes("trigger_invalid_illustration")) {
+    // Passes Zod schema but fails semantic validation with REF_UNKNOWN
+    illustration = {
+      durationSec: 4,
+      actions: [
+        { id: "conn1", type: "connect", at: "start", from: "unknown_target_id", to: { x: 300, y: 300 }, head: "end" },
+      ],
+    };
+  }
+
+  return {
+    answer: `Good question. In this lesson, the key idea behind "${asked.slice(0, 80)}" is that each check removes half of what is left.`,
+    ...(sceneRef ? { sceneRef } : {}),
+    ...(illustration ? { illustration } : {}),
+  };
 }
