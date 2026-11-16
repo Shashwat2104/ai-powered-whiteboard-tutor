@@ -9,7 +9,7 @@ An educational platform that transforms any topic into a 2-minute interactive, s
 
 ## Live Demo
 
-- **Production URL**: [https://ai-powered-whiteboard-tutor.vercel.app](https://ai-powered-whiteboard-tutor.vercel.app)
+- **Production URL**: [https://ai-whiteboard-tutor-pi.vercel.app/](https://ai-whiteboard-tutor-pi.vercel.app/)
 - **Repository**: [https://github.com/Shashwat2104/ai-powered-whiteboard-tutor](https://github.com/Shashwat2104/ai-powered-whiteboard-tutor)
 
 ---
