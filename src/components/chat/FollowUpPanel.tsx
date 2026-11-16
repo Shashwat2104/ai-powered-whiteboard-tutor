@@ -284,7 +284,6 @@ export function FollowUpPanel({
             onClick={handleSubmit}
             aria-disabled={isPending}
             className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 aria-disabled:opacity-40 aria-disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors shadow-sm h-fit self-end"
-            aria-label="Send question"
             data-testid="chat-submit-btn"
           >
             {isPending ? "Sending..." : "Send"}

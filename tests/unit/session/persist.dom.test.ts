@@ -157,4 +157,18 @@ describe("Session Persistence (DOM)", () => {
     const blob = await getAudioBlob("nonexistent-lesson");
     expect(blob).toBeNull();
   });
+
+  it("handles direct Blob storage and version mismatch in savePosition", async () => {
+    // Save version v2 to test savePosition ignoring non-v1
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ version: "v2", positionSec: 0 }));
+    savePosition(42);
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    expect(JSON.parse(raw!).positionSec).toBe(0);
+
+    // Test direct Blob stored in indexedDB
+    const testBlob = new Blob([new Uint8Array([1, 2, 3])], { type: "audio/wav" });
+    await saveAudioBlob("blob-direct", testBlob);
+    const retrieved = await getAudioBlob("blob-direct");
+    expect(retrieved).toBeInstanceOf(Blob);
+  });
 });

@@ -33,10 +33,10 @@ describe("Client Utilities & Hooks (DOM)", () => {
 
   it("useShortcuts attaches listeners and responds to Space, Arrows, Home", async () => {
     const controller = new PlaybackController();
-    const playSpy = vi.spyOn(controller, "play").mockImplementation(async () => {});
-    const pauseSpy = vi.spyOn(controller, "pause").mockImplementation(() => {});
-    const seekSpy = vi.spyOn(controller, "seek").mockImplementation(() => {});
-    const restartSpy = vi.spyOn(controller, "restart").mockImplementation(async () => {});
+    const playSpy = vi.spyOn(controller, "play");
+    const pauseSpy = vi.spyOn(controller, "pause");
+    const seekSpy = vi.spyOn(controller, "seek");
+    const restartSpy = vi.spyOn(controller, "restart");
 
     // Set controller to ready
     controller.startGenerating();
@@ -56,9 +56,10 @@ describe("Client Utilities & Hooks (DOM)", () => {
     // Test Space while ready (should trigger play)
     window.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
     expect(playSpy).toHaveBeenCalled();
+    await Promise.resolve();
+    await Promise.resolve();
 
-    // Test Space while playing (should trigger pause)
-    await controller.play();
+    // Now controller is playing; test Space while playing (should trigger pause)
     window.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
     expect(pauseSpy).toHaveBeenCalled();
 

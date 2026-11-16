@@ -70,6 +70,7 @@ describe("ElevenLabsSynth", () => {
     await expectKind(eleven().synthesize({ text: SPOKEN }), "server");
     server.use(http.post(ELEVEN, () => HttpResponse.json({ detail: { status: "paid_plan_required" } }, { status: 402 })));
     await expectKind(eleven().synthesize({ text: SPOKEN }), "failed");
+    await expectKind(eleven().synthesize({ text: SPOKEN }), "failed");
   });
 
   it("retries once as WAV when the plan rejects the PCM output format", async () => {
@@ -122,6 +123,11 @@ describe("GoogleSynth", () => {
     await expectKind(google().synthesize({ text: "Hi" }), "server");
     server.use(http.post(GOOGLE, () => new HttpResponse("{}", { status: 400 })));
     await expectKind(google().synthesize({ text: "Hi" }), "failed");
+  });
+
+  it("handles network failure and timeout", async () => {
+    server.use(http.post(GOOGLE, () => HttpResponse.error()));
+    await expectKind(google().synthesize({ text: "Hi" }), "server");
   });
 
   it("treats a response with no audio as a failure", async () => {
