@@ -9,6 +9,8 @@ import { usePlayback } from "@/lib/client/usePlayback";
 import { postLesson, ClientError } from "@/lib/client/api";
 import { narrateLesson } from "@/lib/client/narrate";
 import { buildPlayable, type Playable } from "@/lib/client/build-playable";
+import { useShortcuts } from "@/lib/client/useShortcuts";
+import { initSyncProbe } from "@/lib/client/probe";
 import { TopicForm } from "./topic/TopicForm";
 import { ProgressSteps, type GenerationStage } from "./status/ProgressSteps";
 import { Whiteboard } from "./whiteboard/Whiteboard";
@@ -48,6 +50,9 @@ export function LessonApp() {
   const [boardState, setBoardState] = useState<BoardState>(EMPTY_BOARD);
   const abortControllerRef = useRef<AbortController | null>(null);
   const audioElRef = useRef<HTMLAudioElement | null>(null);
+
+  // Global playback keyboard shortcuts (Space, ArrowLeft/Right, Home)
+  useShortcuts({ controller, enabled: isReady });
 
   // Synchronize rAF board state with controller's live position
   useEffect(() => {
@@ -114,6 +119,7 @@ export function LessonApp() {
       // Step 3: Build playable track and timeline
       const playable: Playable = buildPlayable(currentLesson, narrated);
       setTimeline(playable.timeline);
+      initSyncProbe(currentLesson, playable.timeline);
 
       if (playable.audio && !playable.noAudio) {
         const url = URL.createObjectURL(playable.audio);
@@ -151,6 +157,15 @@ export function LessonApp() {
     if (!lesson || !boardState.sceneId) return undefined;
     return lesson.scenes.find((s) => s.id === boardState.sceneId)?.title;
   }, [lesson, boardState.sceneId]);
+
+  const sceneMarkers = useMemo(() => {
+    if (!timeline || !lesson) return undefined;
+    const titlesById = new Map(lesson.scenes.map((s) => [s.id, s.title]));
+    return timeline.scenes.map((s) => ({
+      ...s,
+      title: titlesById.get(s.id),
+    }));
+  }, [timeline, lesson]);
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-5xl mx-auto py-6 px-4 sm:px-6">
@@ -190,7 +205,12 @@ export function LessonApp() {
       {/* Whiteboard Canvas */}
       <div className="flex flex-col gap-3">
         <Whiteboard boardState={boardState} sceneTitle={activeSceneTitle} />
-        {isReady && <PlayerControls controller={controller} />}
+        {isReady && (
+          <PlayerControls
+            controller={controller}
+            scenes={sceneMarkers}
+          />
+        )}
       </div>
 
       {/* Knowledge Check at End or when Available */}
