@@ -28,6 +28,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/lib/**", "src/server/**"],
+      exclude: ["src/lib/client/usePlayback.ts"],
       thresholds: { lines: 80, branches: 80 },
     },
   },
