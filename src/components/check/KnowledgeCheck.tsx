@@ -1,0 +1,167 @@
+"use client";
+
+import { useState } from "react";
+import { CheckCircle, XCircle, RotateCcw, ArrowRight } from "lucide-react";
+import type { KnowledgeCheck as KnowledgeCheckType } from "@/lib/lesson/schema";
+
+export interface KnowledgeCheckProps {
+  checks: KnowledgeCheckType[];
+  onSeekScene?: (sceneId: string) => void;
+  className?: string;
+}
+
+export function KnowledgeCheck({
+  checks,
+  onSeekScene,
+  className = "",
+}: KnowledgeCheckProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+
+  if (!checks || checks.length === 0) return null;
+
+  const currentCheck = checks[currentIndex] ?? checks[0];
+  if (!currentCheck) return null;
+
+  const isCorrect = selectedOption === currentCheck.answerIndex;
+  const hasMore = currentIndex < checks.length - 1;
+
+  const handleSelect = (idx: number) => {
+    if (submitted) return;
+    setSelectedOption(idx);
+  };
+
+  const handleSubmit = () => {
+    if (selectedOption === null) return;
+    setSubmitted(true);
+  };
+
+  const handleNext = () => {
+    if (hasMore) {
+      setCurrentIndex((prev) => prev + 1);
+      setSelectedOption(null);
+      setSubmitted(false);
+    }
+  };
+
+  return (
+    <div
+      className={`w-full max-w-2xl mx-auto p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md ${className}`}
+      data-testid="knowledge-check"
+    >
+      <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100 dark:border-slate-800">
+        <span className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+          Knowledge Check {checks.length > 1 ? `(${currentIndex + 1}/${checks.length})` : ""}
+        </span>
+        {currentCheck.sceneRef && onSeekScene && (
+          <button
+            type="button"
+            onClick={() => onSeekScene(currentCheck.sceneRef!)}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Revisit scene
+          </button>
+        )}
+      </div>
+
+      <fieldset className="space-y-4">
+        <legend className="text-base font-semibold text-slate-900 dark:text-slate-100 leading-snug">
+          {currentCheck.question}
+        </legend>
+
+        <div className="space-y-2.5 pt-1">
+          {currentCheck.options.map((option, idx) => {
+            const isSelected = selectedOption === idx;
+            const isAnswer = idx === currentCheck.answerIndex;
+
+            let borderStyle = "border-slate-200 dark:border-slate-700 hover:border-slate-300";
+            let bgStyle = "bg-slate-50/60 dark:bg-slate-800/40";
+
+            if (isSelected) {
+              borderStyle = "border-blue-500 ring-2 ring-blue-200 dark:ring-blue-900";
+              bgStyle = "bg-blue-50/50 dark:bg-blue-950/20";
+            }
+
+            if (submitted) {
+              if (isAnswer) {
+                borderStyle = "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-100";
+              } else if (isSelected && !isCorrect) {
+                borderStyle = "border-red-500 bg-red-50/60 dark:bg-red-950/30 text-red-900 dark:text-red-100";
+              } else {
+                borderStyle = "border-slate-200 dark:border-slate-800 opacity-60";
+              }
+            }
+
+            return (
+              <label
+                key={idx}
+                className={`flex items-start gap-3 p-3.5 rounded-xl border text-sm font-medium cursor-pointer transition-all ${borderStyle} ${bgStyle}`}
+              >
+                <input
+                  type="radio"
+                  name={`check-${currentCheck.id}`}
+                  value={idx}
+                  checked={isSelected}
+                  onChange={() => handleSelect(idx)}
+                  disabled={submitted}
+                  className="mt-0.5 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="flex-1 text-slate-800 dark:text-slate-200 leading-relaxed">
+                  {option}
+                </span>
+                {submitted && isAnswer && (
+                  <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                )}
+                {submitted && isSelected && !isCorrect && (
+                  <XCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                )}
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
+
+      {/* Submitted Feedback */}
+      {submitted && (
+        <div
+          role="status"
+          className={`mt-5 p-4 rounded-xl border text-sm leading-relaxed ${
+            isCorrect
+              ? "bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900 text-emerald-900 dark:text-emerald-200"
+              : "bg-amber-50/80 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900 text-amber-900 dark:text-amber-200"
+          }`}
+        >
+          <p className="font-semibold mb-1">
+            {isCorrect ? "Correct!" : "Not quite."}
+          </p>
+          <p className="text-slate-700 dark:text-slate-300">{currentCheck.explanation}</p>
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      <div className="mt-5 flex items-center justify-end gap-3">
+        {!submitted ? (
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={selectedOption === null}
+            className="px-5 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-xs transition-all"
+          >
+            Check Answer
+          </button>
+        ) : hasMore ? (
+          <button
+            type="button"
+            onClick={handleNext}
+            className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-xs transition-all"
+          >
+            Next Question
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}

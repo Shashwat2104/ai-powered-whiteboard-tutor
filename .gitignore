@@ -48,15 +48,22 @@ next-env.d.ts
 /graphify-out/
 CLAUDE.md
 AGENTS.md
+.reticle*
 
 # test and tool output
 /playwright-report/
 /test-results/
 /blob-report/
 /.vitest-cache/
+/docs/evidence/*
+!/docs/evidence/.gitkeep
+/docs/evaluation/*.json
 
 # editors and OS
 .vscode/
 .idea/
 Thumbs.db
 *.log
+/scratch/
+/tmp/
+*.tmp

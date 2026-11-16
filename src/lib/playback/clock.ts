@@ -68,10 +68,15 @@ export class AudioClock implements LessonClock {
   constructor(
     private readonly media: MediaLike,
     readonly duration: number,
+    private readonly onDispose?: () => void,
   ) {}
 
   now(): number {
     return this.media.currentTime;
+  }
+
+  dispose(): void {
+    this.onDispose?.();
   }
 
   play(): Promise<void> {
