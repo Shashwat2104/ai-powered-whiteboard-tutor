@@ -49,6 +49,9 @@ next-env.d.ts
 /graphify-out/
 CLAUDE.md
 AGENTS.md
+GEMINI.md
+skills-lock.json
+skills-lock.json
 .reticle*
 
 # test and tool output

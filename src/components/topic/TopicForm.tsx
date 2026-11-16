@@ -7,6 +7,7 @@ import type { Difficulty } from "@/lib/lesson/schema";
 export interface TopicFormProps {
   onSubmit: (topic: string, difficulty: Difficulty) => void;
   isLoading?: boolean;
+  inFlightTopic?: string;
   initialTopic?: string;
   initialDifficulty?: Difficulty;
 }
@@ -14,6 +15,7 @@ export interface TopicFormProps {
 export function TopicForm({
   onSubmit,
   isLoading = false,
+  inFlightTopic,
   initialTopic = "",
   initialDifficulty = "beginner",
 }: TopicFormProps) {
@@ -21,11 +23,20 @@ export function TopicForm({
   const [difficulty, setDifficulty] = useState<Difficulty>(initialDifficulty);
   const [error, setError] = useState<string | null>(null);
 
+  const trimmed = topic.trim();
+  const isDuplicateInFlight = isLoading && Boolean(inFlightTopic) && trimmed.toLowerCase() === inFlightTopic?.trim().toLowerCase();
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const trimmed = topic.trim();
     if (!trimmed) {
       setError("Please enter a topic to learn.");
+      return;
+    }
+    if (trimmed.length > 200) {
+      setError("Topic must be 200 characters or less.");
+      return;
+    }
+    if (isDuplicateInFlight) {
       return;
     }
     setError(null);
@@ -67,7 +78,6 @@ export function TopicForm({
               if (error) setError(null);
             }}
             maxLength={200}
-            disabled={isLoading}
             placeholder="e.g. How Binary Search works, Photosynthesis, Neural Networks..."
             className={`w-full px-4 py-3 rounded-xl border bg-slate-50 dark:bg-slate-800/60 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all ${
               error
@@ -100,7 +110,6 @@ export function TopicForm({
             onValueChange={(val) => {
               if (val) setDifficulty(val as Difficulty);
             }}
-            disabled={isLoading}
             className="inline-flex rounded-lg bg-slate-100 dark:bg-slate-800 p-1 border border-slate-200 dark:border-slate-700/80"
             aria-label="Select difficulty level"
           >
@@ -127,10 +136,10 @@ export function TopicForm({
 
         <button
           type="submit"
-          disabled={isLoading}
-          className="ml-auto px-6 py-2.5 rounded-xl font-medium text-sm text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-60 disabled:cursor-not-allowed shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          disabled={isDuplicateInFlight}
+          className="ml-auto px-6 py-2.5 rounded-xl font-medium text-sm text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-60 disabled:cursor-not-allowed shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
         >
-          {isLoading ? "Designing Lesson..." : "Teach me"}
+          {isDuplicateInFlight ? "Designing Lesson..." : "Teach me"}
         </button>
       </div>
     </form>

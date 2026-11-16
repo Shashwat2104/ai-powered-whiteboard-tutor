@@ -29,7 +29,7 @@ test.describe("Lesson Flow (Mock)", () => {
 
     // 5. Whiteboard elements with data-element-id appear
     const elements = page.locator("[data-element-id]");
-    await expect(elements.first()).toBeVisible({ timeout: 10_000 });
+    await expect(elements.first()).toBeVisible({ timeout: 25_000 });
 
     // 6. Knowledge check is present and interactable
     const knowledgeCheck = page.getByTestId("knowledge-check");

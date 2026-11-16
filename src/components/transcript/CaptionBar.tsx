@@ -35,7 +35,6 @@ export function CaptionBar({ currentText, className = "" }: CaptionBarProps) {
         type="button"
         onClick={() => setEnabled((prev) => !prev)}
         aria-pressed={enabled}
-        aria-label={enabled ? "Turn captions off" : "Turn captions on"}
         data-testid="captions-toggle-btn"
         className={`px-2.5 py-1 text-xs font-semibold rounded flex items-center gap-1 transition-colors ${
           enabled

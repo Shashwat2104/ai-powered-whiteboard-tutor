@@ -56,7 +56,10 @@ test.describe("Responsive Viewport and Reduced Motion (Mock)", () => {
 
     // Start playback
     await playBtn.click();
-    await page.waitForTimeout(1500);
+
+    // Wait for elements to appear on the whiteboard
+    const firstElement = page.locator("[data-element-id]").first();
+    await expect(firstElement).toBeVisible({ timeout: 25_000 });
 
     // Check all currently rendered elements have data-progress="1"
     const elementsProgress = await page.evaluate(() => {
