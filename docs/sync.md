@@ -15,19 +15,22 @@ The synchronization between the narration audio and the animated SVG whiteboard 
 
 ---
 
-## 2. Measured Sync Lag Results
+## 2. How sync is verified
 
-Measurements conducted via `window.__tutorProbe` recording the delta between scheduled marker times and observed visual element start frames:
+What is actually measured, and where:
 
-| Browser Engine | p50 Lag (ms) | p95 Lag (ms) | Max Lag (ms) | Target Max Lag | Seek Redraw (ms) | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Chromium** (Chrome / Edge) | 16 ms | 48 ms | 82 ms | ≤ 250 ms | < 32 ms | ✓ PASS |
-| **Gecko** (Firefox) | 24 ms | 62 ms | 118 ms | ≤ 250 ms | < 45 ms | ✓ PASS |
-| **WebKit** (Safari) | 20 ms | 54 ms | 96 ms | ≤ 250 ms | < 38 ms | ✓ PASS |
+| Check | Where | Threshold | Result |
+| :--- | :--- | :--- | :--- |
+| Marker time vs first frame the element is drawn (`window.__tutorProbe`, `?probe=1`) | `tests/e2e/sync.spec.ts`, Chromium, fake providers | max ≤ 250 ms, p95 ≤ 100 ms | Passes in CI-equivalent local runs |
+| Rendered board equals `expectedAt(audio.currentTime)` after pause, resume, ±10 s seek, restart, seek to end and replay | `tests/e2e/playback.spec.ts`, Chromium | exact set match | Passes |
+| Board equals the expected set at 13 positions (0 to 110 s, including non-empty boards) while pausing, resuming and seeking; natural end then replay | Manual DevTools run against a production build with fake providers (2026-11-16) | exact set match | 13 of 13 matched |
+| `boardStateAt` is deterministic and path-independent, and never shows an element before its time | `tests/unit/board/state.property.test.ts` (fast-check) | property | Passes |
+
+Only Chromium is exercised automatically; Firefox and Safari are not part of the test matrix.
 
 ---
 
 ## 3. Known Limitations & Edge Cases
 
-- **Firefox Timer Resolution (K9)**: Firefox clamps audio `currentTime` precision to 1 ms (or 20 ms depending on anti-fingerprinting settings `privacy.resistFingerprinting`). Even under maximum clamping, max lag remains well below the 250 ms specification ceiling.
+- **Firefox timer resolution**: with `privacy.resistFingerprinting`, Firefox coarsens `currentTime`. The board is still correct for whatever time the browser reports, but animation can look steppier. Not measured automatically.
 - **Virtual Clock Fallback**: In offline / no-audio mode (`provider: "none"`), playback uses `VirtualClock(performance.now)` with estimated speech duration (2.5 words/second).
