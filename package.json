@@ -1,0 +1,60 @@
+{
+  "name": "ai-powered-whiteboard-tutor",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:live": "vitest run --config vitest.live.config.ts",
+    "e2e:mock": "playwright test --project=mock",
+    "e2e:live": "playwright test --project=live",
+    "eval:lessons": "tsx scripts/eval-lessons.ts",
+    "secrets:scan": "gitleaks detect --source . --log-opts=--all --redact",
+    "verify": "pnpm typecheck && pnpm lint && pnpm test"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "@elevenlabs/elevenlabs-js": "^2.78.0",
+    "@google/genai": "^3.3.0",
+    "@radix-ui/react-slider": "^1.6.1",
+    "@radix-ui/react-toggle-group": "^1.2.1",
+    "katex": "^0.19.1",
+    "lucide-react": "^1.73.0",
+    "next": "16.4.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.65.1",
+    "@tailwindcss/turbopack": "4.3.3",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.12",
+    "@types/katex": "^0.16.8",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^5.1.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.6",
+    "fake-indexeddb": "^6.2.8",
+    "fast-check": "^4.10.2",
+    "jsdom": "^31.0.1",
+    "msw": "^3.0.6",
+    "tailwindcss": "4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.1.0"
+  },
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=24"
+  }
+}
