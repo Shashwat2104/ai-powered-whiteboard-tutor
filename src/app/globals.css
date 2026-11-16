@@ -34,3 +34,15 @@ body {
   font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   min-height: 100vh;
 }
+
+/* Ensure no horizontal overflow at small screen viewports (T101) */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Visible focus indicator for keyboard accessibility (T096) */
+:focus-visible {
+  outline: 2px solid #4f46e5 !important;
+  outline-offset: 2px !important;
+}

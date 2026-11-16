@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import type { BoardState } from "@/lib/board/state";
+import type { BoardElement, BoardState } from "@/lib/board/state";
 import type { VisualAction } from "@/lib/lesson/schema";
 import {
   Write,
@@ -16,10 +16,38 @@ import {
 interface WhiteboardProps {
   boardState: BoardState;
   sceneTitle?: string;
+  activeSegmentId?: string;
   className?: string;
 }
 
-export function Whiteboard({ boardState, sceneTitle, className = "" }: WhiteboardProps) {
+function describeElement(element: BoardElement): string {
+  const { action } = element;
+  switch (action.type) {
+    case "write":
+      return `Text: "${action.text}"`;
+    case "shape":
+      return `Shape ${action.kind}${action.label ? ` labeled "${action.label}"` : ""}`;
+    case "array":
+      return `Array row containing: [${action.items.join(", ")}]`;
+    case "list":
+      return `List containing: [${action.items.join(", ")}]`;
+    case "equation":
+      return `Mathematical equation: ${action.latex}`;
+    case "connect":
+      return `Connector arrow${action.label ? ` labeled "${action.label}"` : ""}`;
+    case "annotate":
+      return `Annotation note: "${action.text}"`;
+    default:
+      return `Diagram element`;
+  }
+}
+
+export function Whiteboard({
+  boardState,
+  sceneTitle,
+  activeSegmentId,
+  className = "",
+}: WhiteboardProps) {
   const actionsById = useMemo(() => {
     const map = new Map<string, VisualAction>();
     for (const el of boardState.elements) {
@@ -27,6 +55,14 @@ export function Whiteboard({ boardState, sceneTitle, className = "" }: Whiteboar
     }
     return map;
   }, [boardState.elements]);
+
+  const describedBy = [
+    "whiteboard-desc",
+    activeSegmentId ? `transcript-segment-${activeSegmentId}` : undefined,
+    "whiteboard-elements-list",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div
@@ -38,10 +74,21 @@ export function Whiteboard({ boardState, sceneTitle, className = "" }: Whiteboar
         Whiteboard canvas with {boardState.elements.length} elements.
       </div>
 
+      {/* Visually hidden list of active elements for screen readers */}
+      <div id="whiteboard-elements-list" className="sr-only">
+        <h4>Elements currently visible on the whiteboard:</h4>
+        <ul>
+          {boardState.elements.map((element) => (
+            <li key={element.id}>{describeElement(element)}</li>
+          ))}
+        </ul>
+      </div>
+
       <svg
         viewBox="0 0 1600 900"
         role="img"
         aria-labelledby="whiteboard-title whiteboard-desc"
+        aria-describedby={describedBy}
         className="w-full h-full select-none"
         preserveAspectRatio="xMidYMid meet"
       >

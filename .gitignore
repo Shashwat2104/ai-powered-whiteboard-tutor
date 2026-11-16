@@ -45,6 +45,7 @@ next-env.d.ts
 /specs/
 /.claude/
 /.specify/
+/.agents/
 /graphify-out/
 CLAUDE.md
 AGENTS.md
