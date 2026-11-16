@@ -65,7 +65,7 @@ export function Transcript({
           </svg>
           Lesson Transcript
         </h3>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-xs text-slate-600 mt-0.5">
           Follow along with the narration or click any section to jump directly to it.
         </p>
       </div>
@@ -76,7 +76,7 @@ export function Transcript({
           <section key={scene.id} aria-labelledby={`scene-heading-${scene.id}`} className="space-y-2">
             <h4
               id={`scene-heading-${scene.id}`}
-              className="text-xs font-bold uppercase tracking-wider text-slate-500 px-2 py-1 bg-slate-100/70 rounded"
+              className="text-xs font-bold uppercase tracking-wider text-slate-700 px-2 py-1 bg-slate-100 rounded"
             >
               Scene {sceneIdx + 1}: {scene.title}
             </h4>
@@ -101,10 +101,10 @@ export function Transcript({
                     className={`w-full text-left p-2.5 rounded-lg text-sm transition-all flex flex-col gap-1 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
                       isActive
                         ? "bg-indigo-50/90 border-l-4 border-indigo-600 text-slate-900 font-medium shadow-sm"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent"
+                        : "text-slate-700 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent"
                     }`}
                   >
-                    <div className="flex justify-between items-center text-[11px] text-slate-400">
+                    <div className="flex justify-between items-center text-[11px] text-slate-600 font-medium">
                       <span className="capitalize">{seg.phase}</span>
                       {timing && (
                         <span>

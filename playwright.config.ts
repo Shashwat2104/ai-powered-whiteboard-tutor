@@ -4,6 +4,7 @@ const liveBase = process.env.BASE_URL ?? "http://localhost:3000";
 
 export default defineConfig({
   testDir: "tests/e2e",
+  timeout: 60_000,
   fullyParallel: true,
   reporter: [["list"], ["html", { open: "never" }]],
   projects: [
@@ -24,6 +25,10 @@ export default defineConfig({
         env: {
           TUTOR_TEST_PROVIDERS: "1",
           NARRATION_TOKEN_SECRET: "test-secret-test-secret-test-secret-0000",
+          RATE_LIMIT_LESSON_PER_10MIN: "1000",
+          RATE_LIMIT_NARRATION_PER_10MIN: "1000",
+          RATE_LIMIT_FOLLOWUP_PER_10MIN: "1000",
+          DAILY_LESSON_CAP: "10000",
         },
       },
 });

@@ -95,6 +95,7 @@ export function Timeline({
 
           <Slider.Thumb
             onKeyDown={handleKeyDown}
+            aria-label="Seek lesson timeline"
             aria-valuetext={`${formatTime(positionSec)} of ${formatTime(durationSec)}`}
             aria-valuenow={Math.round(positionSec)}
             aria-valuemin={0}

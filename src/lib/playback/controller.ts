@@ -79,7 +79,13 @@ export class PlaybackController {
   }
 
   setReady(clock: LessonClock, options: { noAudio?: boolean; positionSec?: number } = {}): void {
-    if (this.snapshot.mode !== "narrating" && this.snapshot.mode !== "generating") return this.illegal("setReady");
+    if (
+      this.snapshot.mode !== "narrating" &&
+      this.snapshot.mode !== "generating" &&
+      this.snapshot.mode !== "idle"
+    ) {
+      return this.illegal("setReady");
+    }
     this.releaseClock();
     this.clock = clock;
     this.offEnded = clock.onEnded(() => {

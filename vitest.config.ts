@@ -13,6 +13,7 @@ export default defineConfig({
           name: "unit",
           environment: "node",
           include: ["tests/unit/**/*.test.ts", "tests/integration/**/*.test.ts"],
+          exclude: ["**/*.dom.test.*"],
         },
       },
       {

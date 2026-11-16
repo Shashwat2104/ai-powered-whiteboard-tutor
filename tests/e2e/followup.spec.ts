@@ -77,7 +77,7 @@ test.describe("Contextual Follow-up Chat (Mock)", () => {
     // 9. Verify mini illustration is rendered
     const miniIllustration = page.getByTestId("turn-illustration");
     await expect(miniIllustration).toBeVisible();
-    await expect(miniIllustration.locator("svg")).toBeVisible();
+    await expect(miniIllustration.locator("svg").first()).toBeVisible();
 
     // 10. Verify "Jump to scene" seeks the main player
     const jumpBtn = page.getByTestId("jump-to-scene-btn");

@@ -17,15 +17,34 @@ export interface ChatTurn {
 export interface FollowUpPanelProps {
   lessonContext: LessonContext;
   onJumpToScene?: (sceneId: string) => void;
+  initialTurns?: ChatTurn[];
+  onTurnsChange?: (turns: ChatTurn[]) => void;
   className?: string;
 }
 
-export function FollowUpPanel({ lessonContext, onJumpToScene, className = "" }: FollowUpPanelProps) {
-  const [turns, setTurns] = useState<ChatTurn[]>([]);
+export function FollowUpPanel({
+  lessonContext,
+  onJumpToScene,
+  initialTurns,
+  onTurnsChange,
+  className = "",
+}: FollowUpPanelProps) {
+  const [turns, setTurns] = useState<ChatTurn[]>(() => initialTurns ?? []);
   const [input, setInput] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const activeRequestRef = useRef(false);
+
+  const updateTurns = useCallback(
+    (updater: (prev: ChatTurn[]) => ChatTurn[]) => {
+      setTurns((prev) => {
+        const next = updater(prev);
+        if (onTurnsChange) onTurnsChange(next);
+        return next;
+      });
+    },
+    [onTurnsChange]
+  );
 
   const getSceneTitle = useCallback(
     (sceneId: string): string => {
@@ -51,7 +70,7 @@ export function FollowUpPanel({ lessonContext, onJumpToScene, className = "" }: 
       const turnId = existingTurnId ?? (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `turn-${Date.now()}`);
 
       // Add or update turn in state
-      setTurns((prev) => {
+      updateTurns((prev) => {
         const existingIdx = prev.findIndex((t) => t.turnId === turnId);
         if (existingIdx >= 0) {
           const next = [...prev];
@@ -82,14 +101,14 @@ export function FollowUpPanel({ lessonContext, onJumpToScene, className = "" }: 
         if (!res.ok) {
           const body = await res.json().catch(() => null);
           const msg = body?.error?.message || "Failed to get an answer. Please try again.";
-          setTurns((prev) =>
+          updateTurns((prev) =>
             prev.map((t) => (t.turnId === turnId ? { ...t, pending: false, error: msg } : t)),
           );
           return;
         }
 
         const data: FollowupAnswer = await res.json();
-        setTurns((prev) =>
+        updateTurns((prev) =>
           prev.map((t) =>
             t.turnId === turnId
               ? {
@@ -103,7 +122,7 @@ export function FollowUpPanel({ lessonContext, onJumpToScene, className = "" }: 
           ),
         );
       } catch {
-        setTurns((prev) =>
+        updateTurns((prev) =>
           prev.map((t) =>
             t.turnId === turnId
               ? { ...t, pending: false, error: "Network error. Please check your connection and retry." }
@@ -115,10 +134,11 @@ export function FollowUpPanel({ lessonContext, onJumpToScene, className = "" }: 
         setIsPending(false);
       }
     },
-    [lessonContext, turns],
+    [lessonContext, turns, updateTurns],
   );
 
   const handleSubmit = () => {
+    if (isPending) return;
     const textToSubmit = input;
     if (!textToSubmit.trim()) {
       setValidationError("Please enter a question.");
@@ -149,7 +169,7 @@ export function FollowUpPanel({ lessonContext, onJumpToScene, className = "" }: 
           </svg>
           Ask the Tutor
         </h3>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-xs text-slate-600 mt-0.5">
           Ask questions about &ldquo;{lessonContext.topic}&rdquo; or request clarifications.
         </p>
       </div>
@@ -157,7 +177,7 @@ export function FollowUpPanel({ lessonContext, onJumpToScene, className = "" }: 
       {/* Conversation turns list */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[200px]" data-testid="chat-messages">
         {turns.length === 0 ? (
-          <div className="text-center py-8 text-slate-400 text-sm">
+          <div className="text-center py-8 text-slate-600 text-sm">
             <p>No questions yet.</p>
             <p className="text-xs mt-1">Ask anything about this lesson and the tutor will clarify!</p>
           </div>
@@ -262,15 +282,15 @@ export function FollowUpPanel({ lessonContext, onJumpToScene, className = "" }: 
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isPending || input.trim().length === 0}
-            className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white text-sm font-medium rounded-lg transition-colors shadow-sm disabled:cursor-not-allowed h-fit self-end"
+            aria-disabled={isPending}
+            className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 aria-disabled:opacity-40 aria-disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors shadow-sm h-fit self-end"
             aria-label="Send question"
             data-testid="chat-submit-btn"
           >
             {isPending ? "Sending..." : "Send"}
           </button>
         </div>
-        <div className="flex justify-between items-center mt-1 text-[11px] text-slate-400">
+        <div className="flex justify-between items-center mt-1 text-[11px] text-slate-600">
           <span>Shift + Enter for new line</span>
           <span>{input.length}/500</span>
         </div>
