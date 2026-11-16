@@ -24,7 +24,6 @@ const EMPTY_BOARD: BoardState = {
 export function LessonApp() {
   const controller = useMemo(() => new PlaybackController(), []);
   const {
-    snapshot,
     isPlaying,
     isEnded,
     isReady,
@@ -52,24 +51,20 @@ export function LessonApp() {
 
   // Synchronize rAF board state with controller's live position
   useEffect(() => {
-    if (!lesson || !timeline) {
-      setBoardState(EMPTY_BOARD);
-      return;
-    }
+    if (!lesson || !timeline) return;
 
     let frameId: number | undefined;
 
     const renderFrame = () => {
       const t = controller.getPosition();
-      const nextBoard = boardStateAt(lesson, timeline, t, { reducedMotion: false });
-      setBoardState(nextBoard);
+      setBoardState(boardStateAt(lesson, timeline, t, { reducedMotion: false }));
 
       if (controller.getSnapshot().mode === "playing") {
         frameId = requestAnimationFrame(renderFrame);
       }
     };
 
-    renderFrame();
+    frameId = requestAnimationFrame(renderFrame);
 
     return () => {
       if (frameId !== undefined) cancelAnimationFrame(frameId);

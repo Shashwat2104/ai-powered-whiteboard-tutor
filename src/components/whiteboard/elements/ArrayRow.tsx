@@ -1,6 +1,6 @@
 import type { BoardElement } from "@/lib/board/state";
 import type { VisualAction } from "@/lib/lesson/schema";
-import { HANDWRITING_FONT, HIGHLIGHT_BG, MONO_FONT, resolveColor } from "../palette";
+import { HIGHLIGHT_BG, MONO_FONT, resolveColor } from "../palette";
 
 interface ArrayRowProps {
   element: BoardElement;

@@ -1,7 +1,7 @@
 "use client";
 
-import { useSyncExternalStore, useRef, useCallback, useEffect } from "react";
-import { PlaybackController, type PlaybackSnapshot } from "../playback/controller";
+import { useSyncExternalStore, useRef, useCallback } from "react";
+import { PlaybackController } from "../playback/controller";
 import { AudioClock, VirtualClock } from "../playback/clock";
 
 export function formatTime(seconds: number): string {
