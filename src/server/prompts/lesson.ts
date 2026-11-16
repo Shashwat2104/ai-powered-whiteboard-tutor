@@ -23,7 +23,7 @@ If the topic is harmful, hateful, sexual, nonsense, or not something a person ca
 - Include a realistic example. Never invent facts, statistics, quotes or citations. If you are unsure, say less.
 
 ## Length
-About two minutes of speech: 220 to 400 spoken words in total (aim for about 300), in 5 to 12 segments of 15 to 70 words each. Count carefully.
+About two minutes of speech: 220 to 400 spoken words in total (aim for about 300), in 5 to 12 segments of 15 to 70 words each. Count carefully. The easiest way to land in range is 6 to 8 segments of 40 to 50 words each; short lessons are the most common mistake, so never go under 220 words.
 
 ## Markers
 Narration is plain text for a voice: no markdown, no lists, no emoji. Put a marker [[m1]], [[m2]], and so on immediately before the word that should trigger a visual. Marker names are unique across the whole lesson, each appears exactly once in the text, and each is used by at least one action's "at". Never put a marker inside a word. An action can use "start" or "end" (of its own segment) instead of a marker.

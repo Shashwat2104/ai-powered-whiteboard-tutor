@@ -12,7 +12,7 @@ import { estimateAudio } from "@/lib/timeline/estimate";
 import { boardStateAt, type BoardState } from "@/lib/board/state";
 import { buildPlayable, type Playable } from "@/lib/client/build-playable";
 import { narrateLesson } from "@/lib/client/narrate";
-import { postLesson, ClientError } from "@/lib/client/api";
+import { postLesson, ClientError, type TtsProviderName } from "@/lib/client/api";
 import { initSyncProbe } from "@/lib/client/probe";
 import { PlaybackController } from "@/lib/playback/controller";
 import { usePlayback } from "@/lib/client/usePlayback";
@@ -29,6 +29,7 @@ import {
 import { TopicForm } from "./topic/TopicForm";
 import { ProgressSteps, type GenerationStage } from "./status/ProgressSteps";
 import { ErrorNotice } from "./status/ErrorNotice";
+import { ProvenanceNote, type VoiceSource } from "./status/ProvenanceNote";
 import { Whiteboard } from "./whiteboard/Whiteboard";
 import { PlayerControls } from "./player/PlayerControls";
 import { KnowledgeCheck } from "./check/KnowledgeCheck";
@@ -37,6 +38,14 @@ import { Transcript } from "./transcript/Transcript";
 import { CaptionBar } from "./transcript/CaptionBar";
 import type { LessonContext } from "@/lib/followup/schema";
 import { Play } from "lucide-react";
+
+const ALL_TTS_PROVIDERS: readonly TtsProviderName[] = ["elevenlabs", "google"];
+
+/** Every voice provider, with the preferred one (the voice a lesson was first recorded in) first. */
+function voicesPreferring(preferred: string | undefined): TtsProviderName[] {
+  const first = ALL_TTS_PROVIDERS.find((p) => p === preferred);
+  return first ? [first, ...ALL_TTS_PROVIDERS.filter((p) => p !== first)] : [...ALL_TTS_PROVIDERS];
+}
 
 const EMPTY_BOARD: BoardState = {
   sceneId: "",
@@ -74,6 +83,7 @@ export function LessonApp({ audioRef }: LessonAppProps) {
   });
   const [currentError, setCurrentError] = useState<ClientError | Error | string | null>(null);
   const [isNoAudio, setIsNoAudio] = useState(false);
+  const [voice, setVoice] = useState<VoiceSource | undefined>(undefined);
   const [restoreNotice, setRestoreNotice] = useState<string | null>(null);
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
@@ -92,6 +102,7 @@ export function LessonApp({ audioRef }: LessonAppProps) {
   const [lastSubmittedTopic, setLastSubmittedTopic] = useState<string>("");
   const lastNarrationTokensRef = useRef<Record<string, string>>({});
   const lastNarrationExpiresRef = useRef<string | undefined>(undefined);
+  const lastProviderOrderRef = useRef<TtsProviderName[]>([...ALL_TTS_PROVIDERS]);
 
   // Global playback keyboard shortcuts (Space, ArrowLeft/Right, Home)
   useShortcuts({ controller, enabled: isReady });
@@ -117,6 +128,7 @@ export function LessonApp({ audioRef }: LessonAppProps) {
       if (restored.audioBlob) {
         const url = URL.createObjectURL(restored.audioBlob);
         setAudioUrl(url);
+        setVoice(voicesPreferring(restored.ttsProvider)[0]);
         setStage("ready");
       } else {
         const isExpired =
@@ -135,10 +147,11 @@ export function LessonApp({ audioRef }: LessonAppProps) {
           setStage("narrating");
           try {
             const narrated = await narrateLesson(restoredLesson, {
-              providerOrder: ["elevenlabs", "google"],
+              providerOrder: voicesPreferring(restored.ttsProvider),
               tokens: restored.narrationTokens,
             });
             const playable = buildPlayable(restoredLesson, narrated);
+            setVoice(narrated.provider);
             if (playable.audio && !playable.noAudio) {
               await saveAudioBlob(restoredLesson.id, playable.audio);
               const url = URL.createObjectURL(playable.audio);
@@ -241,6 +254,7 @@ export function LessonApp({ audioRef }: LessonAppProps) {
 
       lastNarrationTokensRef.current = lessonResult.narration.tokens;
       lastNarrationExpiresRef.current = lessonResult.narration.expiresAt;
+      lastProviderOrderRef.current = [...lessonResult.narration.providerOrder];
 
       // Step 2: Synthesize narration
       const narrated = await narrateLesson(currentLesson, lessonResult.narration, {
@@ -252,6 +266,7 @@ export function LessonApp({ audioRef }: LessonAppProps) {
 
       // Step 3: Build playable track and timeline
       const playable: Playable = buildPlayable(currentLesson, narrated);
+      setVoice(narrated.provider);
       setTimeline(playable.timeline);
       initSyncProbe(currentLesson, playable.timeline);
 
@@ -296,10 +311,11 @@ export function LessonApp({ audioRef }: LessonAppProps) {
     setStage("narrating");
     try {
       const narrated = await narrateLesson(lesson, {
-        providerOrder: ["elevenlabs", "google"],
+        providerOrder: lastProviderOrderRef.current,
         tokens: lastNarrationTokensRef.current,
       });
       const playable = buildPlayable(lesson, narrated);
+      setVoice(narrated.provider);
       if (playable.audio && !playable.noAudio) {
         await saveAudioBlob(lesson.id, playable.audio);
         const url = URL.createObjectURL(playable.audio);
@@ -530,6 +546,7 @@ export function LessonApp({ audioRef }: LessonAppProps) {
 
         {/* Live Narration Caption Bar */}
         {isReady && <CaptionBar currentText={activeSegmentText} />}
+        {isReady && <ProvenanceNote model={lesson?.generatedBy.model} voice={isNoAudio ? "none" : voice} />}
 
         {/* Playback Controls */}
         {isReady && (

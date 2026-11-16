@@ -6,6 +6,7 @@ import {
   refBox,
   overlapRatio,
   insideBoard,
+  fitToBoard,
   FONT_PX,
 } from "@/lib/lesson/layout";
 import type { VisualAction } from "@/lib/lesson/schema";
@@ -168,5 +169,43 @@ describe("Layout and Coordinate Utilities", () => {
     expect(insideBoard({ x: -10, y: 50, w: 100, h: 100 })).toBe(false);
     expect(insideBoard({ x: 1500, y: 50, w: 200, h: 100 })).toBe(false);
     expect(insideBoard({ x: 50, y: 850, w: 100, h: 100 })).toBe(false);
+  });
+
+  describe("fitToBoard", () => {
+    const shape = (x: number, y: number, w = 200, h = 100): VisualAction =>
+      ({ id: "s1", type: "shape", at: "start", kind: "rect", x, y, w, h }) as VisualAction;
+
+    it("leaves an element that already fits unchanged (same object)", () => {
+      const a = shape(100, 100);
+      expect(fitToBoard(a)).toBe(a);
+    });
+
+    it("shifts an element back inside the right and bottom edges without resizing", () => {
+      const fitted = fitToBoard(shape(1500, 850));
+      expect(fitted).toMatchObject({ x: 1400, y: 800, w: 200, h: 100 });
+      expect(insideBoard(estimateBox(fitted)!)).toBe(true);
+    });
+
+    it("shifts an element back inside the left and top edges", () => {
+      expect(fitToBoard(shape(-30, -5))).toMatchObject({ x: 0, y: 0 });
+    });
+
+    it("moves centred text by its centre so it still fits", () => {
+      const text = { id: "w1", type: "write", at: "start", x: 1580, y: 100, text: "photosynthesis", size: "lg", align: "center" } as VisualAction;
+      expect(insideBoard(estimateBox(fitToBoard(text))!)).toBe(true);
+    });
+
+    it("does not mutate the original action", () => {
+      const a = shape(1500, 850);
+      fitToBoard(a);
+      expect(a).toMatchObject({ x: 1500, y: 850 });
+    });
+
+    it("leaves elements bigger than the board and non-positioned actions alone", () => {
+      const huge = shape(0, 0, 2000, 100);
+      expect(fitToBoard(huge)).toBe(huge);
+      const highlight = { id: "h1", type: "highlight", at: "start", target: "s1" } as VisualAction;
+      expect(fitToBoard(highlight)).toBe(highlight);
+    });
   });
 });

@@ -1,8 +1,9 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import type { z } from "zod";
+import { fitToBoard } from "@/lib/lesson/layout";
 import { lessonEnvelopeSchema, lessonSchema, type Difficulty, type Lesson } from "@/lib/lesson/schema";
-import { validateLessonSemantics } from "@/lib/lesson/semantics";
+import { onlyCosmeticIssues, validateLessonSemantics } from "@/lib/lesson/semantics";
 import type { Env } from "../env";
 import { loadLlmProviders } from "../llm";
 import { generateWithFallback } from "../llm/router";
@@ -23,6 +24,13 @@ export function normalizeTopic(raw: string): string {
 }
 
 type Envelope = z.infer<typeof lessonEnvelopeSchema>;
+
+/** Nudge elements that poke past the board edge back inside, so a few stray pixels never fail a lesson. */
+export function fitEnvelopeToBoard(envelope: Envelope): Envelope {
+  if (!envelope.lesson) return envelope;
+  const segments = envelope.lesson.segments.map((segment) => ({ ...segment, actions: segment.actions.map(fitToBoard) }));
+  return { ...envelope, lesson: { ...envelope.lesson, segments } };
+}
 
 function validateEnvelope(envelope: Envelope): RepairIssue[] {
   if (envelope.status === "rejected") return [];
@@ -52,7 +60,9 @@ export async function generateLesson(
       system: lessonSystemPrompt(),
       userContent: lessonUserMessage(topic, input.difficulty),
       effort: env.ANTHROPIC_EFFORT_LESSON,
+      normalize: fitEnvelopeToBoard,
       validate: validateEnvelope,
+      tolerate: onlyCosmeticIssues,
     },
     models,
   );

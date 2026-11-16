@@ -15,6 +15,8 @@ import { followupSystemPrompt, followupUserMessage } from "../prompts/followup";
 import { ApiError } from "../security/errors";
 
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const FOLLOWUP_ATTEMPT_MS = 18_000;
+const FOLLOWUP_BUDGET_MS = 26_000;
 const MAX_CACHE_SIZE = 1000;
 
 interface CacheEntry {
@@ -86,6 +88,9 @@ export async function answerFollowup(
       system: followupSystemPrompt(),
       userContent: followupUserMessage(input.lessonContext, input.history, input.question),
       effort: env.ANTHROPIC_EFFORT_FOLLOWUP ?? "low",
+      // The follow-up route may run for 30 s (maxDuration); finish routing well before that.
+      attemptTimeoutMs: FOLLOWUP_ATTEMPT_MS,
+      budgetMs: FOLLOWUP_BUDGET_MS,
     },
     models,
   );

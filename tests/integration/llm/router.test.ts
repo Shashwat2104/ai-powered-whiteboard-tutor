@@ -41,12 +41,82 @@ describe("generateWithFallback", () => {
     expect(b.calls).toHaveLength(0);
   });
 
-  it.each<LlmErrorKind>(["rate_limited", "timeout", "refusal", "server", "config"])("moves on to the next provider after %s", async (kind) => {
+  it.each<LlmErrorKind>(["rate_limited", "refusal", "config"])("moves on to the next provider after %s", async (kind) => {
     const a = model("anthropic", () => kind);
     const b = model("gemini", () => ({ n: 7 }));
     const result = await generateWithFallback(request, [a, b]);
     expect(result.provider).toBe("gemini");
     expect(a.calls).toHaveLength(1);
+  });
+
+  it.each<LlmErrorKind>(["server", "timeout"])("retries a transient %s once on the same provider", async (kind) => {
+    const a = model("gemini", (call) => (call === 1 ? kind : { n: 7 }));
+    const b = model("anthropic", () => ({ n: 9 }));
+    const result = await generateWithFallback(request, [a, b]);
+    expect(result).toMatchObject({ provider: "gemini", attempts: 2 });
+    expect(a.calls[1]!.messages).toEqual(a.calls[0]!.messages);
+    expect(b.calls).toHaveLength(0);
+  });
+
+  it.each<LlmErrorKind>(["server", "timeout"])("moves on after a second %s in a row", async (kind) => {
+    const a = model("gemini", () => kind);
+    const b = model("anthropic", () => ({ n: 7 }));
+    const result = await generateWithFallback(request, [a, b]);
+    expect(result.provider).toBe("anthropic");
+    expect(a.calls).toHaveLength(2);
+  });
+
+  it("normalizes output before validating it and returns the normalized data", async () => {
+    const a = model("gemini", () => ({ n: 2 }));
+    const result = await generateWithFallback({ ...request, normalize: (d: Out) => ({ n: d.n * 3 }) }, [a]);
+    expect(result).toMatchObject({ data: { n: 6 }, attempts: 1 });
+  });
+
+  describe("tolerable issues", () => {
+    // n of 3 or 4 is "a little short" (tolerable); below 3 is broken.
+    const tolerant = {
+      ...request,
+      tolerate: (issues: readonly { code: string }[]) => issues.every((i) => i.code === "TOO_SMALL"),
+      validate: (d: Out) =>
+        d.n < 3 ? [{ code: "BROKEN", path: "n", message: "n is unusable" }] : d.n < 5 ? [{ code: "TOO_SMALL", path: "n", message: "n must be at least 5" }] : [],
+    };
+
+    it("keeps repairing while attempts remain, even when the issues are tolerable", async () => {
+      const a = model("gemini", (call) => ({ n: call === 1 ? 4 : 9 }));
+      expect(await generateWithFallback(tolerant, [a])).toMatchObject({ data: { n: 9 }, attempts: 2 });
+    });
+
+    it("returns the best tolerable candidate when the provider runs out of attempts", async () => {
+      const a = model("gemini", (call) => ({ n: [4, 1, 3][call - 1]! }));
+      const b = model("anthropic", () => ({ n: 9 }));
+      const result = await generateWithFallback(tolerant, [a, b]);
+      expect(result).toMatchObject({ provider: "gemini", data: { n: 4 }, attempts: 1 });
+      expect(a.calls).toHaveLength(MAX_ATTEMPTS_PER_PROVIDER);
+      expect(b.calls).toHaveLength(0);
+    });
+
+    it("never returns a candidate with intolerable issues", async () => {
+      const a = model("gemini", () => ({ n: 1 }));
+      await expect(generateWithFallback(tolerant, [a])).rejects.toMatchObject({ kind: "generation_failed" });
+    });
+
+    it("returns the best tolerable candidate when the time budget runs out", async () => {
+      let clock = 0;
+      const a = model("gemini", () => {
+        clock += 40_000;
+        return { n: 4 };
+      });
+      // After one 40 s call, 50 s - 40 s - safety margin leaves too little for another attempt.
+      const result = await generateWithFallback({ ...tolerant, budgetMs: 50_000 }, [a], () => clock);
+      expect(result.data).toEqual({ n: 4 });
+      expect(a.calls).toHaveLength(1);
+    });
+
+    it("returns a tolerable candidate when a later attempt fails outright", async () => {
+      const a = model("gemini", (call) => (call === 1 ? { n: 4 } : "rate_limited"));
+      const b = model("anthropic", () => "config");
+      expect((await generateWithFallback(tolerant, [a, b])).data).toEqual({ n: 4 });
+    });
   });
 
   it("asks the same provider to repair invalid output, sending its own reply and the problems back", async () => {

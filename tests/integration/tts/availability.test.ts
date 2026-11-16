@@ -46,6 +46,16 @@ describe("ttsProviderOrder", () => {
     expect(await ttsProviderOrder(parseEnv(base), 2000)).toEqual(["elevenlabs", "google"]);
   });
 
+  it("drops ElevenLabs when the key itself is invalid, so narration goes straight to the next voice", async () => {
+    server.use(http.get(SUBSCRIPTION, () => HttpResponse.json({ detail: { status: "invalid_api_key", message: "Invalid API key" } }, { status: 401 })));
+    expect(await ttsProviderOrder(parseEnv(base), 2000)).toEqual(["google"]);
+  });
+
+  it("keeps ElevenLabs when the key only lacks permission to read the subscription", async () => {
+    server.use(http.get(SUBSCRIPTION, () => HttpResponse.json({ detail: { status: "missing_permissions" } }, { status: 401 })));
+    expect(await ttsProviderOrder(parseEnv(base), 2000)).toEqual(["elevenlabs", "google"]);
+  });
+
   it("does not look anything up in test mode or without an ElevenLabs key", async () => {
     const testEnv = parseEnv({ NARRATION_TOKEN_SECRET: base.NARRATION_TOKEN_SECRET, TUTOR_TEST_PROVIDERS: "1" });
     expect(await ttsProviderOrder(testEnv, 2000)).toEqual(["elevenlabs", "google"]);

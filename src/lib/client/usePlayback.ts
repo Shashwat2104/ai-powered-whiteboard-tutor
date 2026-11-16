@@ -21,6 +21,7 @@ export function usePlayback(controller: PlaybackController) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [audioTrouble, setAudioTrouble] = useState(false);
   const stalledStartRef = useRef<number | null>(null);
+  const detachAudioRef = useRef<(() => void) | null>(null);
 
   const togglePlay = useCallback(() => {
     if (snapshot.mode === "playing") {
@@ -51,14 +52,22 @@ export function usePlayback(controller: PlaybackController) {
         stalledStartRef.current = null;
       };
 
-      audioEl.addEventListener("error", handleError);
-      audioEl.addEventListener("stalled", handleStalled);
-      audioEl.addEventListener("playing", handleClearStalled);
-      audioEl.addEventListener("timeupdate", handleClearStalled);
-      audioEl.addEventListener("canplay", handleClearStalled);
+      // Each new narration (or reload of the same element) replaces the previous listeners.
+      detachAudioRef.current?.();
+      const listeners: [string, () => void][] = [
+        ["error", handleError],
+        ["stalled", handleStalled],
+        ["playing", handleClearStalled],
+        ["timeupdate", handleClearStalled],
+        ["canplay", handleClearStalled],
+      ];
+      listeners.forEach(([event, handler]) => audioEl.addEventListener(event, handler));
+      detachAudioRef.current = () => listeners.forEach(([event, handler]) => audioEl.removeEventListener(event, handler));
     },
     [controller]
   );
+
+  useEffect(() => () => detachAudioRef.current?.(), []);
 
   const initVirtualClock = useCallback(
     (durationSec: number) => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { LessonDraft, Segment, VisualAction } from "@/lib/lesson/schema";
 import { wordCount } from "@/lib/lesson/markers";
-import { validateLessonSemantics } from "@/lib/lesson/semantics";
+import { onlyCosmeticIssues, validateLessonSemantics } from "@/lib/lesson/semantics";
 import { validDraft, withSegment, words } from "../../fixtures/lessons";
 
 function expectError(draft: LessonDraft, code: string, path: string): void {
@@ -86,10 +86,16 @@ describe("validateLessonSemantics", () => {
     expectError(draft, "TEXT_TOO_LONG", "segments[2].actions[4]");
   });
 
-  it("NARRATION_LENGTH: too short", () => {
-    const short = (s: Segment): Segment => ({ ...s, text: words(15) });
+  it("NARRATION_LENGTH: a little short of the two-minute target", () => {
+    const short = (s: Segment): Segment => ({ ...s, text: words(32) }); // 6 x 32 = 192 words
     const draft = { ...validDraft(), segments: validDraft().segments.map(short) };
     expectError(draft, "NARRATION_LENGTH", "segments");
+  });
+
+  it("NARRATION_TOO_SHORT: under the hard floor, far from two minutes", () => {
+    const short = (s: Segment): Segment => ({ ...s, text: words(15) }); // 90 words
+    const draft = { ...validDraft(), segments: validDraft().segments.map(short) };
+    expectError(draft, "NARRATION_TOO_SHORT", "segments");
   });
 
   it("NARRATION_LENGTH: too long", () => {
@@ -139,5 +145,33 @@ describe("validateLessonSemantics", () => {
   it("NO_VISUALS: a scene without any creating action", () => {
     const draft = withSegment(withSegment(validDraft(), 4, { actions: [] }), 5, { actions: [] });
     expectError(draft, "NO_VISUALS", "scenes[2]");
+  });
+});
+
+describe("onlyCosmeticIssues", () => {
+  const issue = (code: string) => ({ code, path: "p", message: "m" });
+
+  it.each(["NARRATION_LENGTH", "SEGMENT_LENGTH", "OVERLAP", "TEXT_TOO_LONG", "PHASE_ORDER", "NO_VISUALS"])("tolerates %s", (code) => {
+    expect(onlyCosmeticIssues([issue(code)])).toBe(true);
+  });
+
+  it.each([
+    "MARK_SYNTAX",
+    "MARK_MISSING",
+    "MARK_UNUSED",
+    "MARK_DUPLICATE",
+    "REF_UNKNOWN",
+    "ID_DUPLICATE",
+    "OUT_OF_BOUNDS",
+    "SCENE_COVERAGE",
+    "ANSWER_INDEX",
+    "SCENE_REF",
+    "NARRATION_TOO_SHORT",
+  ])("rejects %s, which would break or gut the lesson", (code) => {
+    expect(onlyCosmeticIssues([issue("OVERLAP"), issue(code)])).toBe(false);
+  });
+
+  it("does not treat an empty list as a reason to tolerate anything", () => {
+    expect(onlyCosmeticIssues([])).toBe(true);
   });
 });
