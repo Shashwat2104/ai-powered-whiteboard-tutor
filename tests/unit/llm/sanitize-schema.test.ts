@@ -48,14 +48,14 @@ describe("sanitizeSchema for Gemini", () => {
     expect(out).not.toContain("maxLength");
   });
 
-  it("keeps required lists and numeric limits", () => {
+  it("keeps required lists and strips bounds to avoid DFA state explosion", () => {
     const out = sanitizeSchema(
       { type: "object", required: ["a"], properties: { a: { type: "array", minItems: 2, maxItems: 5, items: { type: "number", minimum: 0, maximum: 9 } } } },
       "gemini",
     );
     expect(JSON.stringify(out)).toContain('"required":["a"]');
-    expect(JSON.stringify(out)).toContain('"minItems":2');
-    expect(JSON.stringify(out)).toContain('"maximum":9');
+    expect(JSON.stringify(out)).not.toContain('"minItems"');
+    expect(JSON.stringify(out)).not.toContain('"maximum"');
   });
 });
 
