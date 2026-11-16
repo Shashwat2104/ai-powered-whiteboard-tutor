@@ -211,4 +211,32 @@ describe("PlaybackController", () => {
     controller.startNarrating();
     expect(listener).toHaveBeenCalledTimes(1);
   });
+
+  it("dispose releases clock and clears listeners", () => {
+    const { controller, clock } = ready();
+    controller.dispose();
+    expect(clock.disposed).toBe(true);
+  });
+
+  it("drives tick loop when raf is provided", async () => {
+    let cb: (() => void) | undefined;
+    const raf = vi.fn((step: () => void) => {
+      cb = step;
+      return 42;
+    });
+    const cancel = vi.fn();
+    const clock = new FakeClock();
+    const controller = new PlaybackController({ raf, caf: cancel });
+    controller.startGenerating();
+    controller.startNarrating();
+    controller.setReady(clock);
+
+    await controller.play();
+    expect(raf).toHaveBeenCalled();
+    clock.t = 1.0;
+    cb?.();
+    expect(controller.getPosition()).toBe(1.0);
+    controller.pause();
+    expect(cancel).toHaveBeenCalled();
+  });
 });

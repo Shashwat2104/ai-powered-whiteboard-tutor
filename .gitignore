@@ -61,7 +61,8 @@ skills-lock.json
 /.vitest-cache/
 /docs/evidence/*
 !/docs/evidence/.gitkeep
-/docs/evaluation/*.json
+/docs/evaluation/*
+/scripts/eval-topics.json
 
 # editors and OS
 .vscode/

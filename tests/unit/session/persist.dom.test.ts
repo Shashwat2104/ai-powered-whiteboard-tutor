@@ -6,6 +6,7 @@ import {
   getAudioBlob,
   restoreSession,
   saveAudioBlob,
+  savePosition,
   saveSession,
   STORAGE_KEY,
 } from "@/lib/session/persist";
@@ -117,5 +118,43 @@ describe("Session Persistence (DOM)", () => {
 
     const restored = await restoreSession();
     expect(restored).toBeNull();
+  });
+
+  it("savePosition updates position and handles missing session", async () => {
+    // With no session
+    savePosition(10);
+    expect(sessionStorage.getItem(STORAGE_KEY)).toBeNull();
+
+    // With active session
+    await saveSession({
+      lesson,
+      narrationTokens: tokens,
+      conversation,
+      positionSec: 5,
+    });
+
+    savePosition(18.5);
+    const restored = await restoreSession();
+    expect(restored?.positionSec).toBe(18.5);
+  });
+
+  it("handles corrupted json and non-matching types gracefully", async () => {
+    sessionStorage.setItem(STORAGE_KEY, "{ invalid json");
+    const restored = await restoreSession();
+    expect(restored).toBeNull();
+
+    // Save with existing invalid JSON does not crash
+    await saveSession({
+      lesson,
+      narrationTokens: tokens,
+      conversation: [],
+    });
+    expect(await restoreSession()).not.toBeNull();
+  });
+
+  it("handles non-existent or unexpected types in audio store", async () => {
+    // Non-existent lessonId
+    const blob = await getAudioBlob("nonexistent-lesson");
+    expect(blob).toBeNull();
   });
 });
