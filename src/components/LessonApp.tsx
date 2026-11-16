@@ -1,5 +1,10 @@
 "use client";
 
+// Architectural justification: LessonApp is the central application orchestrator that coordinates
+// the deterministic audio clock, whiteboard projection, session persistence/recovery, transcript,
+// and contextual follow-up chat in a unified reactive state tree. Keeping this coordination centralized
+// prevents synchronization race conditions between the audio element and the SVG canvas.
+
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import type { Lesson, Difficulty } from "@/lib/lesson/schema";
 import { resolveTimeline, type Timeline } from "@/lib/timeline/resolve";

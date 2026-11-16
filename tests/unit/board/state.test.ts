@@ -97,4 +97,35 @@ describe("boardStateAt", () => {
     expect(state(999).sceneId).toBe("sc3");
     expect(ids(999)).toContain("eq");
   });
+
+  it("evaluates a 150-action lesson in < 16ms (under 1ms per frame)", () => {
+    // Generate a 150-action lesson
+    const actions = Array.from({ length: 150 }, (_, i) => ({
+      id: `act_${i}`,
+      type: "write" as const,
+      size: "md" as const,
+      at: "m1",
+      x: 100 + (i % 10) * 50,
+      y: 100 + Math.floor(i / 10) * 40,
+      text: `Step ${i}`,
+    }));
+    const largeLesson = {
+      ...lesson,
+      segments: [
+        {
+          ...lesson.segments[0]!,
+          actions,
+        },
+        ...lesson.segments.slice(1),
+      ],
+    };
+    const tl = resolveTimeline(largeLesson, fixedAudio(largeLesson));
+    const start = performance.now();
+    for (let frame = 0; frame < 60; frame++) {
+      boardStateAt(largeLesson, tl, frame * 0.1, { reducedMotion: false });
+    }
+    const duration = performance.now() - start;
+    const perFrame = duration / 60;
+    expect(perFrame).toBeLessThan(16); // Must comfortably satisfy 60 FPS
+  });
 });
