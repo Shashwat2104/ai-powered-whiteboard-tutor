@@ -89,3 +89,25 @@ export function overlapRatio(a: Box, b: Box): number {
 export function insideBoard(box: Box): boolean {
   return box.x >= 0 && box.y >= 0 && box.x + box.w <= BOARD_WIDTH && box.y + box.h <= BOARD_HEIGHT;
 }
+
+/** How far to move a span [start, start+size) so it lies within [0, limit]; 0 when it fits or never can. */
+function shiftInto(start: number, size: number, limit: number): number {
+  if (size > limit) return 0;
+  if (start < 0) return -start;
+  if (start + size > limit) return limit - (start + size);
+  return 0;
+}
+
+/**
+ * Move a positioned element that pokes past the board edge back inside, keeping its size. Models
+ * often misjudge text width by a few pixels; nudging is safer than rejecting a whole lesson.
+ * Returns the same object when nothing needs to move. Elements larger than the board are left alone.
+ */
+export function fitToBoard(action: VisualAction): VisualAction {
+  const box = estimateBox(action);
+  if (!box || !("x" in action) || !("y" in action)) return action;
+  const dx = shiftInto(box.x, box.w, BOARD_WIDTH);
+  const dy = shiftInto(box.y, box.h, BOARD_HEIGHT);
+  if (dx === 0 && dy === 0) return action;
+  return { ...action, x: action.x + dx, y: action.y + dy };
+}

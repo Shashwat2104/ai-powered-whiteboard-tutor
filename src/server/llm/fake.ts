@@ -1,6 +1,6 @@
 import "server-only";
 import type { LlmProvider } from "../env";
-import { validDraft } from "../../../tests/fixtures/lessons";
+import { validDraft } from "./fake-lesson";
 import { LlmError, type GenerateRequest, type GenerateResult, type StructuredModel } from "./types";
 
 /**

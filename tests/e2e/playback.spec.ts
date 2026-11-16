@@ -72,5 +72,31 @@ test.describe("Playback Controls and Board State Synchronization (Mock)", () => 
       return audio ? audio.currentTime : -1;
     });
     expect(restartTime).toBeLessThan(2);
+
+    // 9. Seek to the end: the lesson finishes and the board shows its final state.
+    const slider = page.getByRole("slider", { name: /Seek lesson timeline/i });
+    await slider.focus();
+    await page.keyboard.press("End");
+    const replayBtn = page.getByRole("button", { name: /Replay lesson/i });
+    await expect(replayBtn).toBeVisible();
+    await expect(page.getByText("Ended", { exact: true })).toBeVisible();
+
+    // 10. Replay: back to the start, playing, with the board cleared to match t≈0.
+    await replayBtn.click();
+    await expect(page.getByRole("button", { name: /Pause lesson/i })).toBeVisible();
+    await expect
+      .poll(() => page.evaluate(() => document.querySelector("audio")?.currentTime ?? -1))
+      .toBeLessThan(3);
+    const replayMatches = await page.evaluate(() => {
+      const probe = window.__tutorProbe;
+      const audio = document.querySelector("audio");
+      if (!probe || !audio) return false;
+      const expected = [...probe.expectedAt(audio.currentTime)].sort();
+      const rendered = Array.from(document.querySelectorAll("[data-element-id]"))
+        .map((el) => el.getAttribute("data-element-id") ?? "")
+        .sort();
+      return JSON.stringify(expected) === JSON.stringify(rendered);
+    });
+    expect(replayMatches).toBe(true);
   });
 });

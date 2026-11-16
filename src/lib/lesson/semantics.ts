@@ -13,6 +13,7 @@ export type SemanticCode =
   | "OVERLAP"
   | "TEXT_TOO_LONG"
   | "NARRATION_LENGTH"
+  | "NARRATION_TOO_SHORT"
   | "SEGMENT_LENGTH"
   | "PHASE_ORDER"
   | "SCENE_COVERAGE"
@@ -27,6 +28,8 @@ export interface SemanticError {
 }
 
 export const LIMITS = {
+  /** Below this the lesson is nowhere near two minutes and is never accepted. */
+  narrationFloorWords: 180,
   narrationMinWords: 220,
   narrationMaxWords: 400,
   segmentMinWords: 15,
@@ -115,9 +118,28 @@ function checkLengths(segments: Segments): SemanticError[] {
     }
   });
   if (total < LIMITS.narrationMinWords || total > LIMITS.narrationMaxWords) {
-    errors.push(fail("NARRATION_LENGTH", "segments", `Narration has ${total} words; expected ${LIMITS.narrationMinWords}-${LIMITS.narrationMaxWords}`));
+    const code = total < LIMITS.narrationFloorWords ? "NARRATION_TOO_SHORT" : "NARRATION_LENGTH";
+    errors.push(fail(code, "segments", `Narration has ${total} words; expected ${LIMITS.narrationMinWords}-${LIMITS.narrationMaxWords}`));
   }
   return errors;
+}
+
+/**
+ * Problems that leave a lesson fully playable: every marker fires, every reference resolves and
+ * every segment belongs to a scene. Only the look or the length is off.
+ */
+const COSMETIC_CODES: ReadonlySet<string> = new Set<SemanticCode>([
+  "NARRATION_LENGTH",
+  "SEGMENT_LENGTH",
+  "OVERLAP",
+  "TEXT_TOO_LONG",
+  "PHASE_ORDER",
+  "NO_VISUALS",
+]);
+
+/** True when every issue is cosmetic, so the lesson may be used if no cleaner version arrives. */
+export function onlyCosmeticIssues(issues: readonly { code: string }[]): boolean {
+  return issues.every((issue) => COSMETIC_CODES.has(issue.code));
 }
 
 function checkPhases(segments: Segments): SemanticError[] {
