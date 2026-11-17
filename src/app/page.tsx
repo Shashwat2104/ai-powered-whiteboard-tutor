@@ -1,43 +1,55 @@
 import { LessonApp } from "@/components/LessonApp";
-import { Sparkles, ShieldCheck } from "lucide-react";
+import { PenTool, Keyboard } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col justify-between overflow-x-hidden">
-      {/* Top Navigation */}
-      <header className="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-40">
+    <div className="min-h-screen flex flex-col justify-between overflow-x-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+      {/* Top Navigation Bar */}
+      <header className="border-b border-slate-200/90 dark:border-slate-800/90 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs">
-              <Sparkles className="w-4 h-4" />
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-indigo-700 dark:bg-indigo-600 flex items-center justify-center text-white shadow-xs">
+              <PenTool className="w-4 h-4 stroke-[2.2]" aria-hidden="true" />
             </div>
-            <div>
-              <span className="font-bold text-base tracking-tight text-slate-900 dark:text-slate-100">
-                Whiteboard Tutor
-              </span>
-              <span className="hidden sm:inline-block ml-2 text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-medium">
-                AI Interactive
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-base tracking-tight text-slate-900 dark:text-slate-100">
+                  Whiteboard Tutor
+                </span>
+                <span className="hidden sm:inline-block text-[11px] font-medium px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60">
+                  Pedagogical Studio
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-600 dark:text-slate-400 font-normal">
+                Synchronized whiteboard drawings &amp; voice narration
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-medium text-slate-600 dark:text-slate-400">
-            <div className="flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-500" />
-              <span className="hidden sm:inline">Multi-Provider LLM &amp; TTS Fallback</span>
+          <div className="flex items-center gap-3 text-xs font-medium text-slate-600 dark:text-slate-400">
+            <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60">
+              <Keyboard className="w-3.5 h-3.5 text-slate-600 dark:text-slate-400" aria-hidden="true" />
+              <span>Space: Play/Pause · ←/→: 10s · Home: Restart</span>
             </div>
           </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-6xl mx-auto p-2 sm:p-4 lg:p-6">
+      <main className="flex-1 w-full max-w-6xl mx-auto p-3 sm:p-5 lg:p-6 flex flex-col justify-start">
         <LessonApp />
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
-        <p>AI-Powered Interactive Whiteboard Tutor &bull; Built with Next.js, Claude &amp; Gemini, ElevenLabs &amp; Google TTS</p>
+      <footer className="border-t border-slate-200 dark:border-slate-800/80 bg-white/60 dark:bg-slate-900/40 py-5 text-xs text-slate-600 dark:text-slate-400">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+          <p>
+            <strong className="font-semibold text-slate-700 dark:text-slate-300">Whiteboard Tutor</strong> — Step-by-step cognitive clarity through synchronized narration and real-time diagrams.
+          </p>
+          <p className="text-[11px] text-slate-600 dark:text-slate-400">
+            Accessible whiteboard pedagogy · WCAG 2.2 AA compliant
+          </p>
+        </div>
       </footer>
     </div>
   );
