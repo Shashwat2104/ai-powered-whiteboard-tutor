@@ -92,8 +92,6 @@ FollowUpPanel ── POST /api/followup ─────────▶ answerFol
 - `src/lib/*`: shared pure logic (lesson schema and validator, timeline, board state, playback state machine).
 - `src/components/*`: React UI.
 
-More detail: [docs/architecture.md](docs/architecture.md), [docs/lesson-schema.md](docs/lesson-schema.md), [docs/sync.md](docs/sync.md) and [docs/report.md](docs/report.md) (decisions and trade-offs).
-
 ## Run it locally
 
 **Prerequisites:** Node.js 24 or newer (see `.nvmrc`), pnpm 10 (`corepack enable`), and at least one LLM key (Gemini or Anthropic). A TTS key is recommended; without one, lessons play in no-audio mode.
