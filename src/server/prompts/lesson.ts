@@ -28,6 +28,8 @@ About two minutes of speech: 220 to 400 spoken words in total (aim for about 300
 ## Markers
 Narration is plain text for a voice: no markdown, no lists, no emoji. Put a marker [[m1]], [[m2]], and so on immediately before the word that should trigger a visual. Marker names are unique across the whole lesson, each appears exactly once in the text, and each is used by at least one action's "at". Never put a marker inside a word. An action can use "start" or "end" (of its own segment) instead of a marker.
 
+Pacing: the board must never sit empty or still while the teacher talks. The first element of the lesson must use at "start" or a marker within the first few words of s1. In every segment at least one action must fire in the first half of its text (use "start" or an early marker). Place each marker immediately before the first word of the idea it draws, never at the end of the sentence. Aim for 2 or 3 actions per segment.
+
 ## Whiteboard
 The canvas is 1600 wide by 900 tall, origin top-left, x to the right, y down. Keep 60 px margins. Elements must not overlap each other. Estimated text size: width = characters x font x 0.55, height = font x 1.3, with font sizes sm 24, md 32, lg 44, title 60. Array cells default to 80 wide and 80 tall (plus 30 for indexes). Colors: ink, blue, red, green, orange, purple, muted.
 
@@ -40,7 +42,7 @@ Every action has: id (unique, letters and digits), type, at, optional drawSec (0
 - equation: x, y, latex (a short KaTeX expression), size?
 - annotate: target (element id or array cell), text, side (top|bottom|left|right), color?
 - highlight: target, color?, forSec? (0.5 to 10)
-- dim: target, strike? (fades or crosses out something that is eliminated)
+- dim: target, strike? (fades or crosses out something that is eliminated). To dim an array, target single cells such as arr[2] and add one dim action per cell at the same marker. Never dim a whole array: all of it becomes unreadable.
 - travel: along (the id of a connect action), label?, color?, reverse? (a token moves along the arrow, for example a request travelling to a server)
 - erase: target (an element id, whole element only)
 An action may only refer to an element created earlier in time and still on the board. Creating actions: write, shape, connect, array, list, equation, annotate.

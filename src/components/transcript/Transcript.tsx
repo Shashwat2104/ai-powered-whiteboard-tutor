@@ -24,15 +24,17 @@ export function Transcript({
   className = "",
 }: TranscriptProps) {
   const activeSegmentRef = useRef<HTMLButtonElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-scroll to active segment
+  // Scroll only the transcript's own box. scrollIntoView would also scroll the page and pull the whiteboard off screen.
   useEffect(() => {
-    if (activeSegmentRef.current) {
-      activeSegmentRef.current.scrollIntoView({
-        behavior: reducedMotion ? "auto" : "smooth",
-        block: "nearest",
-      });
-    }
+    const body = bodyRef.current;
+    const active = activeSegmentRef.current;
+    if (!body || !active) return;
+    const bodyBox = body.getBoundingClientRect();
+    const box = active.getBoundingClientRect();
+    const delta = box.top < bodyBox.top ? box.top - bodyBox.top : box.bottom > bodyBox.bottom ? box.bottom - bodyBox.bottom : 0;
+    if (delta !== 0) body.scrollBy({ top: delta, behavior: reducedMotion ? "auto" : "smooth" });
   }, [activeSegmentId, reducedMotion]);
 
   // Map segments to their timings in the timeline
@@ -71,6 +73,7 @@ export function Transcript({
 
       {/* Transcript Body */}
       <div
+        ref={bodyRef}
         className="flex-1 overflow-y-auto p-4 space-y-5"
         tabIndex={0}
         aria-label="Interactive lesson transcript"
