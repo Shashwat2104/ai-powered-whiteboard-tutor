@@ -53,7 +53,7 @@ export function ProgressSteps({
   return (
     <div
       aria-live="polite"
-      className={`w-full max-w-xl mx-auto py-3 px-5 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-sm backdrop-blur-xs flex items-center justify-between gap-3 ${className}`}
+      className={`w-full max-w-xl mx-auto py-3.5 px-5 rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-slate-800 shadow-xs backdrop-blur-xs flex items-center justify-between gap-3 ${className}`}
     >
       {steps.map((step, idx) => {
         const isCurrent = step.status === "current";
@@ -63,9 +63,9 @@ export function ProgressSteps({
           <div key={step.id} className="flex items-center gap-2 flex-1">
             <div className="flex items-center justify-center">
               {isComplete ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-500 shrink-0" />
               ) : isCurrent ? (
-                <Loader2 className="w-5 h-5 text-blue-500 animate-spin shrink-0" />
+                <Loader2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400 animate-spin motion-reduce:animate-none shrink-0" />
               ) : (
                 <Circle className="w-4 h-4 text-slate-300 dark:text-slate-600 shrink-0" />
               )}
@@ -74,10 +74,10 @@ export function ProgressSteps({
             <span
               className={`text-xs font-medium whitespace-nowrap ${
                 isComplete
-                  ? "text-slate-700 dark:text-slate-300"
+                  ? "text-slate-800 dark:text-slate-200"
                   : isCurrent
-                  ? "text-blue-600 dark:text-blue-400 font-semibold"
-                  : "text-slate-400 dark:text-slate-500"
+                  ? "text-indigo-700 dark:text-indigo-300 font-semibold"
+                  : "text-slate-600 dark:text-slate-400"
               }`}
             >
               {step.label}
@@ -85,8 +85,10 @@ export function ProgressSteps({
 
             {idx < steps.length - 1 && (
               <div
-                className={`h-0.5 flex-1 mx-1 rounded-full transition-colors ${
-                  isComplete ? "bg-emerald-300 dark:bg-emerald-800" : "bg-slate-200 dark:bg-slate-700"
+                className={`h-0.5 flex-1 mx-1.5 rounded-full transition-colors ${
+                  isComplete
+                    ? "bg-emerald-300 dark:bg-emerald-800"
+                    : "bg-slate-200 dark:bg-slate-700"
                 }`}
               />
             )}

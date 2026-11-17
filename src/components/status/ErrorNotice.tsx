@@ -87,7 +87,10 @@ export function ErrorNotice({
     case "generation_failed":
     default:
       headline = "Lesson generation failed";
-      description = typeof error === "string" ? error : error.message || "We could not create the lesson right now. Please try again.";
+      description =
+        typeof error === "string"
+          ? error
+          : error.message || "We could not create the lesson right now. Please try again.";
       showRetry = Boolean(onRetry);
       showEditTopic = true;
       break;
@@ -98,33 +101,33 @@ export function ErrorNotice({
       role="alert"
       data-testid="error-notice"
       data-error-kind={kind}
-      className={`p-4 rounded-xl border border-red-200 bg-red-50/90 dark:bg-red-950/40 dark:border-red-900 shadow-sm text-sm text-red-900 dark:text-red-200 max-w-2xl mx-auto w-full flex flex-col gap-3 ${className}`}
+      className={`p-4 sm:p-5 rounded-2xl border border-red-200 dark:border-red-900/80 bg-red-50/95 dark:bg-red-950/40 shadow-xs text-sm text-red-900 dark:text-red-200 max-w-2xl mx-auto w-full flex flex-col gap-3.5 ${className}`}
     >
       <div className="flex items-start gap-3">
         {kind === "network" ? (
-          <WifiOff className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+          <WifiOff className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" aria-hidden="true" />
         ) : (
-          <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+          <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" aria-hidden="true" />
         )}
         <div className="flex-1">
-          <h4 className="font-semibold text-red-950 dark:text-red-100">{headline}</h4>
-          <p className="mt-1 text-xs sm:text-sm text-red-800 dark:text-red-300 leading-relaxed">
+          <h4 className="font-semibold text-red-950 dark:text-red-100 text-sm tracking-tight">{headline}</h4>
+          <p className="mt-1 text-xs sm:text-sm text-red-850 dark:text-red-300 leading-relaxed">
             {description}
           </p>
         </div>
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center gap-3 pl-8">
+      <div className="flex flex-wrap items-center gap-3 pl-8">
         {showRetry && onRetry && (
           <button
             type="button"
             onClick={onRetry}
             data-testid="error-retry-btn"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium text-xs transition-colors shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium text-xs transition-colors shadow-xs cursor-pointer min-h-[38px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Retry
+            <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>Retry</span>
           </button>
         )}
         {showEditTopic && onEditTopic && (
@@ -132,10 +135,10 @@ export function ErrorNotice({
             type="button"
             onClick={onEditTopic}
             data-testid="error-edit-topic-btn"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 hover:bg-red-100 dark:hover:bg-slate-800 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-800 font-medium text-xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white dark:bg-slate-900 hover:bg-red-100 dark:hover:bg-slate-800 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-800 font-medium text-xs transition-colors cursor-pointer min-h-[38px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1"
           >
-            <Edit3 className="w-3.5 h-3.5" />
-            Edit Topic
+            <Edit3 className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>Edit Topic</span>
           </button>
         )}
       </div>
