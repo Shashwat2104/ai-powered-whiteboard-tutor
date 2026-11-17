@@ -2,23 +2,23 @@ import type { Color } from "@/lib/lesson/schema";
 import { FONT_PX } from "@/lib/lesson/layout";
 
 export const COLOR_MAP: Record<Color, string> = {
-  ink: "#1e293b",
-  blue: "#2563eb",
-  red: "#dc2626",
-  green: "#16a34a",
-  orange: "#ea580c",
-  purple: "#9333ea",
-  muted: "#94a3b8",
+  ink: "#0f172a",
+  blue: "#1d4ed8",
+  red: "#b91c1c",
+  green: "#047857",
+  orange: "#c2410c",
+  purple: "#7e22ce",
+  muted: "#64748b",
 };
 
 export const HIGHLIGHT_BG: Record<Color, string> = {
-  ink: "rgba(30, 41, 59, 0.15)",
-  blue: "rgba(37, 99, 235, 0.2)",
-  red: "rgba(220, 38, 38, 0.2)",
-  green: "rgba(22, 163, 74, 0.2)",
-  orange: "rgba(234, 88, 12, 0.25)",
-  purple: "rgba(147, 51, 234, 0.2)",
-  muted: "rgba(148, 163, 184, 0.25)",
+  ink: "rgba(15, 23, 42, 0.12)",
+  blue: "rgba(29, 78, 216, 0.18)",
+  red: "rgba(185, 28, 28, 0.18)",
+  green: "rgba(4, 120, 87, 0.18)",
+  orange: "rgba(194, 65, 12, 0.22)",
+  purple: "rgba(126, 34, 206, 0.18)",
+  muted: "rgba(100, 116, 139, 0.2)",
 };
 
 export const HANDWRITING_FONT = "var(--font-caveat), 'Caveat', 'Kalam', cursive, sans-serif";

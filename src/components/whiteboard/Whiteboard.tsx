@@ -66,8 +66,15 @@ export function Whiteboard({
 
   return (
     <div
-      className={`relative w-full aspect-[16/9] rounded-xl overflow-hidden border border-slate-200/80 shadow-md bg-[#fafbfd] ${className}`}
+      className={`relative w-full aspect-[16/9] rounded-2xl overflow-hidden border-2 border-slate-300 dark:border-slate-700/80 shadow-md bg-[#fafbfd] dark:bg-[#090d16] ${className}`}
     >
+      {/* Subtle dry-erase studio frame header */}
+      {sceneTitle && (
+        <div className="absolute top-3 left-4 z-10 px-3 py-1 rounded-md bg-white/85 dark:bg-slate-900/85 backdrop-blur-xs border border-slate-200/80 dark:border-slate-800/80 text-xs font-semibold text-slate-700 dark:text-slate-300 pointer-events-none select-none shadow-2xs">
+          <span>{sceneTitle}</span>
+        </div>
+      )}
+
       {/* Accessible screen-reader narration summary */}
       <div className="sr-only" aria-live="polite">
         {sceneTitle ? `Scene: ${sceneTitle}. ` : ""}
@@ -98,9 +105,9 @@ export function Whiteboard({
         </desc>
 
         <defs>
-          {/* Subtle grid pattern for dry-erase whiteboard realism */}
+          {/* Subtle dot grid pattern for dry-erase whiteboard realism */}
           <pattern id="wb-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <circle cx="20" cy="20" r="0.75" fill="#cbd5e1" opacity="0.45" />
+            <circle cx="20" cy="20" r="0.8" fill="#94a3b8" opacity="0.35" />
           </pattern>
         </defs>
 

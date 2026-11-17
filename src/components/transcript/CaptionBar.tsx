@@ -12,7 +12,7 @@ export function CaptionBar({ currentText, className = "" }: CaptionBarProps) {
 
   return (
     <div
-      className={`flex items-center justify-between gap-3 px-4 py-2.5 bg-slate-900/90 backdrop-blur text-white rounded-lg shadow-sm text-sm border border-slate-800 ${className}`}
+      className={`flex items-center justify-between gap-3 px-4 py-2.5 bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-md text-white rounded-xl shadow-xs text-sm border border-slate-800 ${className}`}
       data-testid="caption-bar"
     >
       {/* Captions Text Area */}
@@ -36,9 +36,9 @@ export function CaptionBar({ currentText, className = "" }: CaptionBarProps) {
         onClick={() => setEnabled((prev) => !prev)}
         aria-pressed={enabled}
         data-testid="captions-toggle-btn"
-        className={`px-2.5 py-1 text-xs font-semibold rounded flex items-center gap-1 transition-colors ${
+        className={`px-3 py-1.5 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 ${
           enabled
-            ? "bg-indigo-600 text-white hover:bg-indigo-500 shadow-sm"
+            ? "bg-indigo-600 text-white hover:bg-indigo-500 shadow-2xs"
             : "bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700"
         }`}
       >
