@@ -7,6 +7,7 @@ import { boardStateAt, type BoardState } from "@/lib/board/state";
 import { VirtualClock } from "@/lib/playback/clock";
 import { resolveTimeline } from "@/lib/timeline/resolve";
 import { Whiteboard } from "../whiteboard/Whiteboard";
+import { RotateCcw } from "lucide-react";
 
 interface MiniBoardProps {
   illustration: Illustration;
@@ -104,21 +105,19 @@ export function MiniBoard({ illustration, className = "" }: MiniBoardProps) {
   };
 
   return (
-    <div className={`relative rounded-lg overflow-hidden border border-slate-200 bg-white shadow-sm my-2 ${className}`}>
+    <div className={`relative rounded-xl overflow-hidden border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs my-2.5 ${className}`}>
       <Whiteboard boardState={boardState} sceneTitle="Illustration" className="border-0 rounded-none shadow-none" />
 
       {/* Replay Overlay Button */}
-      <div className="absolute bottom-2 right-2 flex items-center gap-2">
+      <div className="absolute bottom-2.5 right-2.5 flex items-center gap-2">
         <button
           type="button"
           onClick={handleReplay}
-          className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-700 bg-white/90 backdrop-blur border border-slate-300 rounded shadow-sm hover:bg-slate-50 transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs border border-slate-300 dark:border-slate-700 rounded-lg shadow-2xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           aria-label="Replay illustration animation"
         >
-          <svg className="w-3.5 h-3.5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          {isFinished ? "Replay" : isPlaying ? "Restart" : "Play"}
+          <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
+          <span>{isFinished ? "Replay" : isPlaying ? "Restart" : "Play"}</span>
         </button>
       </div>
     </div>

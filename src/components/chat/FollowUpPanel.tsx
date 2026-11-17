@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, type KeyboardEvent } from "react";
 import type { ConversationTurn, FollowupAnswer, Illustration, LessonContext } from "@/lib/followup/schema";
 import { MiniBoard } from "./MiniBoard";
+import { MessageSquare, PlayCircle, Send, RefreshCw } from "lucide-react";
 
 export interface ChatTurn {
   turnId: string;
@@ -34,6 +35,7 @@ export function FollowUpPanel({
   const [isPending, setIsPending] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const activeRequestRef = useRef(false);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const updateTurns = useCallback(
     (updater: (prev: ChatTurn[]) => ChatTurn[]) => {
@@ -67,7 +69,11 @@ export function FollowUpPanel({
       activeRequestRef.current = true;
       setIsPending(true);
 
-      const turnId = existingTurnId ?? (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `turn-${Date.now()}`);
+      const turnId =
+        existingTurnId ??
+        (typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `turn-${Date.now()}`);
 
       // Add or update turn in state
       updateTurns((prev) => {
@@ -125,7 +131,11 @@ export function FollowUpPanel({
         updateTurns((prev) =>
           prev.map((t) =>
             t.turnId === turnId
-              ? { ...t, pending: false, error: "Network error. Please check your connection and retry." }
+              ? {
+                  ...t,
+                  pending: false,
+                  error: "Network error. Please check your connection and retry.",
+                }
               : t,
           ),
         );
@@ -159,34 +169,67 @@ export function FollowUpPanel({
     void askQuestion(turn.question, turn.turnId);
   };
 
+  const handleQuickQuestion = (q: string) => {
+    setInput(q);
+    if (validationError) setValidationError(null);
+    textareaRef.current?.focus();
+  };
+
   return (
-    <div className={`flex flex-col h-full bg-slate-50 border border-slate-200 rounded-xl overflow-hidden ${className}`}>
+    <div
+      className={`flex flex-col h-full bg-slate-50/70 dark:bg-slate-950/70 border border-slate-200/90 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs ${className}`}
+    >
       {/* Panel Header */}
-      <div className="px-4 py-3 bg-white border-b border-slate-200">
-        <h3 className="font-semibold text-slate-800 text-sm flex items-center gap-2">
-          <svg className="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-          </svg>
-          Ask the Tutor
+      <div className="px-4 py-3.5 bg-white dark:bg-slate-900 border-b border-slate-200/90 dark:border-slate-800">
+        <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2 tracking-tight">
+          <MessageSquare className="w-4 h-4 text-indigo-600 dark:text-indigo-400 stroke-[2.2]" aria-hidden="true" />
+          <span>Ask the Tutor</span>
         </h3>
-        <p className="text-xs text-slate-600 mt-0.5">
+        <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
           Ask questions about &ldquo;{lessonContext.topic}&rdquo; or request clarifications.
         </p>
       </div>
 
       {/* Conversation turns list */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[200px]" data-testid="chat-messages">
+      <div
+        className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[200px]"
+        data-testid="chat-messages"
+      >
         {turns.length === 0 ? (
-          <div className="text-center py-8 text-slate-600 text-sm">
-            <p>No questions yet.</p>
-            <p className="text-xs mt-1">Ask anything about this lesson and the tutor will clarify!</p>
+          <div className="flex flex-col items-center justify-center text-center py-8 px-2 text-slate-600 dark:text-slate-400 text-sm space-y-3">
+            <div>
+              <p className="font-medium text-slate-700 dark:text-slate-300">No questions yet.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Ask anything about this lesson and the tutor will clarify with text and diagrams!
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-1.5 w-full max-w-sm pt-2">
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider text-left">
+                Suggested questions:
+              </span>
+              {[
+                "Can you explain the main idea step-by-step?",
+                "What is a common edge case or pitfall?",
+                "How does this apply in practice?",
+              ].map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => handleQuickQuestion(suggestion)}
+                  className="text-left text-xs p-2 rounded-lg bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                >
+                  &ldquo;{suggestion}&rdquo;
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           turns.map((turn) => (
             <div key={turn.turnId} className="space-y-2">
               {/* Learner Question */}
               <div className="flex justify-end">
-                <div className="max-w-[85%] bg-indigo-600 text-white rounded-2xl rounded-tr-sm px-3.5 py-2 text-sm shadow-sm">
+                <div className="max-w-[85%] bg-indigo-700 text-white dark:bg-indigo-600 rounded-2xl rounded-tr-xs px-4 py-2.5 text-sm shadow-2xs leading-relaxed">
                   {turn.question}
                 </div>
               </div>
@@ -194,56 +237,59 @@ export function FollowUpPanel({
               {/* Tutor Answer / State */}
               <div className="flex justify-start">
                 <div
-                  className="max-w-[90%] bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-tl-sm p-3 text-sm shadow-sm space-y-2"
+                  className="max-w-[92%] bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-slate-900 dark:text-slate-100 rounded-2xl rounded-tl-xs p-4 text-sm shadow-xs space-y-2.5"
                   aria-live="polite"
                   data-testid="tutor-response"
                 >
                   {turn.pending && (
-                    <div className="flex items-center gap-2 text-slate-500 italic py-1" data-testid="turn-pending">
-                      <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                    <div
+                      className="flex items-center gap-2 text-slate-500 dark:text-slate-400 italic py-1 text-xs"
+                      data-testid="turn-pending"
+                    >
+                      <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
                       Thinking...
                     </div>
                   )}
 
                   {turn.error && (
-                    <div className="text-red-600 space-y-1">
+                    <div className="text-red-600 dark:text-red-400 space-y-1.5 text-xs">
                       <p>{turn.error}</p>
                       <button
                         type="button"
                         onClick={() => handleRetry(turn)}
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 underline"
+                        className="inline-flex items-center gap-1 font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
                       >
-                        Retry
+                        <RefreshCw className="w-3 h-3" aria-hidden="true" />
+                        <span>Retry</span>
                       </button>
                     </div>
                   )}
 
                   {turn.answer && (
                     <div>
-                      <p className="whitespace-pre-wrap leading-relaxed">{turn.answer}</p>
+                      <p className="whitespace-pre-wrap leading-relaxed text-slate-850 dark:text-slate-150">
+                        {turn.answer}
+                      </p>
 
                       {/* Scene Reference link */}
                       {turn.sceneRef && (
-                        <div className="mt-2 pt-2 border-t border-slate-100 flex items-center gap-2">
+                        <div className="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2">
                           <button
                             type="button"
                             onClick={() => onJumpToScene?.(turn.sceneRef!)}
-                            className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline bg-indigo-50 px-2.5 py-1 rounded"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:underline bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200/60 dark:border-indigo-800/60 px-3 py-1.5 rounded-lg cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                             aria-label={`Jump to scene: ${getSceneTitle(turn.sceneRef)}`}
                             data-testid="jump-to-scene-btn"
                           >
-                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Jump to scene: {getSceneTitle(turn.sceneRef)}
+                            <PlayCircle className="w-3.5 h-3.5" aria-hidden="true" />
+                            <span>Jump to scene: {getSceneTitle(turn.sceneRef)}</span>
                           </button>
                         </div>
                       )}
 
                       {/* MiniBoard illustration */}
                       {turn.illustration && (
-                        <div className="mt-2" data-testid="turn-illustration">
+                        <div className="mt-3" data-testid="turn-illustration">
                           <MiniBoard illustration={turn.illustration} />
                         </div>
                       )}
@@ -257,14 +303,19 @@ export function FollowUpPanel({
       </div>
 
       {/* Input area */}
-      <div className="p-3 bg-white border-t border-slate-200">
+      <div className="p-3 sm:p-4 bg-white dark:bg-slate-900 border-t border-slate-200/90 dark:border-slate-800">
         {validationError && (
-          <p className="text-xs text-red-600 mb-1.5 font-medium" role="alert" data-testid="input-error">
+          <p
+            className="text-xs text-red-600 dark:text-red-400 mb-1.5 font-medium"
+            role="alert"
+            data-testid="input-error"
+          >
             {validationError}
           </p>
         )}
         <div className="relative flex items-end gap-2">
           <textarea
+            ref={textareaRef}
             value={input}
             onChange={(e) => {
               setInput(e.target.value);
@@ -275,7 +326,7 @@ export function FollowUpPanel({
             rows={2}
             placeholder="Ask a question about this lesson... (Enter to send)"
             aria-label="Ask a question about this lesson"
-            className="flex-1 resize-none rounded-lg border border-slate-300 p-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+            className="flex-1 resize-none rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/80 p-2.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 dark:focus:border-indigo-500 transition-all"
             disabled={isPending}
             data-testid="chat-input"
           />
@@ -283,15 +334,16 @@ export function FollowUpPanel({
             type="button"
             onClick={handleSubmit}
             aria-disabled={isPending}
-            className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 aria-disabled:opacity-40 aria-disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors shadow-sm h-fit self-end"
+            className="px-4 py-2.5 bg-indigo-700 hover:bg-indigo-800 active:bg-indigo-900 dark:bg-indigo-600 dark:hover:bg-indigo-500 aria-disabled:opacity-40 aria-disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-all shadow-xs h-fit self-end min-h-[44px] cursor-pointer flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1"
             data-testid="chat-submit-btn"
           >
-            {isPending ? "Sending..." : "Send"}
+            <span>{isPending ? "Sending..." : "Send"}</span>
+            <Send className="w-3.5 h-3.5" aria-hidden="true" />
           </button>
         </div>
-        <div className="flex justify-between items-center mt-1 text-[11px] text-slate-600">
+        <div className="flex justify-between items-center mt-1.5 text-[11px] text-slate-600 dark:text-slate-400">
           <span>Shift + Enter for new line</span>
-          <span>{input.length}/500</span>
+          <span className="tabular-nums">{input.length}/500</span>
         </div>
       </div>
     </div>
