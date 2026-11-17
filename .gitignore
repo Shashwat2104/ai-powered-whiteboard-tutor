@@ -56,7 +56,8 @@ skills-lock.json
 
 /.playwright-mcp/
 
-# documentation and reports (only README.md ships)
+# documentation and markdown (only README.md ships for deployment)
+docs/
 /docs/
 *.md
 !README.md
@@ -66,9 +67,6 @@ skills-lock.json
 /test-results/
 /blob-report/
 /.vitest-cache/
-/docs/evidence/*
-!/docs/evidence/.gitkeep
-/docs/evaluation/*
 /scripts/eval-topics.json
 
 # editors and OS
