@@ -7,6 +7,10 @@ Type any topic and get a two-minute lesson taught the way a good tutor teaches a
 - **Live demo:** [https://ai-whiteboard-tutor-pi.vercel.app/](https://ai-whiteboard-tutor-pi.vercel.app/) (no sign-in needed)
 - **Repository:** [https://github.com/Shashwat2104/ai-powered-whiteboard-tutor](https://github.com/Shashwat2104/ai-powered-whiteboard-tutor)
 
+<video src="https://github.com/Shashwat2104/ai-powered-whiteboard-tutor/raw/main/assets/pre.mp4" controls width="100%"></video>
+
+If the player does not load, [open the demo video](assets/pre.mp4).
+
 ---
 
 ## The learner and the problem
@@ -156,11 +160,3 @@ The E2E suite covers the full lesson flow, every playback control including repl
 4. **No-audio timing is estimated** (2.5 words/s) when no voice provider works.
 5. **English only** for generation and speech alignment.
 6. **Firefox with `privacy.resistFingerprinting`** coarsens media timestamps, which can add visible jitter to animations (the board state itself is still correct).
-
-## What I would improve next
-
-- Learner-driven branching: let the learner say "I'm lost" mid-lesson to get a simpler re-explanation of just the current scene.
-- Practice beyond multiple choice: small interactive board tasks (for example "click the middle element").
-- A shared, persistent rate limiter (for example Redis) and response caching for popular topics.
-- A lesson-quality evaluation loop in CI with a fixed topic set and a model-graded rubric.
-- More languages, with per-language voices and word timing.
