@@ -7,9 +7,7 @@ Type any topic and get a two-minute lesson taught the way a good tutor teaches a
 - **Live demo:** [https://ai-whiteboard-tutor-pi.vercel.app/](https://ai-whiteboard-tutor-pi.vercel.app/) (no sign-in needed)
 - **Repository:** [https://github.com/Shashwat2104/ai-powered-whiteboard-tutor](https://github.com/Shashwat2104/ai-powered-whiteboard-tutor)
 
-<video src="https://github.com/Shashwat2104/ai-powered-whiteboard-tutor/raw/main/assets/pre.mp4" controls width="100%"></video>
-
-If the player does not load, [open the demo video](assets/pre.mp4).
+https://github.com/user-attachments/assets/05129016-18d7-4b24-a4c8-a43e9e14038e
 
 ---
 
