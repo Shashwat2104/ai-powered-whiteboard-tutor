@@ -185,3 +185,30 @@ Yes. The application behaves predictably and reliably. It provides clear keyboar
 2. **Export to PDF / SVG Notes**: Provide a 1-click export of all completed whiteboard scenes as a structured study guide with accompanying transcript notes.
 3. **Multi-Speed Audio Playback**: Add `0.75x`, `1.25x`, and `1.5x` playback speed toggles to the media bar for students who wish to review concepts at varying tempos.
 4. **Interactive Formula Exploration**: Integrate interactive KaTeX equation stepping where hovering over terms in the whiteboard formula highlights corresponding terms in the transcript.
+
+---
+
+## 8. Mandatory Anti-AI-Generated Website Audit & Fixes (The 15 Patterns)
+
+A dedicated, comprehensive inspection of the entire codebase and rendered UI was performed across all 15 anti-patterns. Each pattern was evaluated for genuine existence, location, user impact, and resolution.
+
+### Audit & Fix Summary Table
+
+| No. | Design issue | Found? | Location | Action taken | Status |
+|---|---|---|---|---|---|
+| 1 | Generic gradients | No | `src/**/*.{tsx,css}` | Codebase audited; zero arbitrary purple/blue/pink background gradients exist. Color system uses solid semantic slate/indigo tokens. | Not needed |
+| 2 | Excessive glassmorphism | Yes | `src/app/page.tsx`, `src/components/LessonApp.tsx` | Removed `backdrop-blur-md` and translucent backgrounds (`bg-white/95`, `bg-white/60`, `bg-slate-900/40`) from `<header>` and `<footer>` in favor of solid, opaque, high-contrast surfaces (`bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800`). Replaced `backdrop-blur-xs` in autoplay overlay with clean solid `bg-slate-900/80`. | Fixed |
+| 3 | Repetitive card layouts | No | `src/components/` | Audited all views; no generic 3-card or 4-card grids exist. The application uses dedicated pedagogical layouts (topic launchpad, whiteboard canvas, scrubbing transport dock, structured quiz milestone cards, and dual-role conversation stream). | Not needed |
+| 4 | Generic hero section | No | `src/app/page.tsx`, `src/components/topic/TopicForm.tsx` | No oversized headings, generic subtitles, or floating mockup graphics exist. The launchpad centers immediately on the educational topic prompt with 4 curriculum starter chips. | Not needed |
+| 5 | Excessive rounded corners | No | `src/components/` | Audited border-radius tokens. Radii follow a disciplined hierarchy: containers (`rounded-xl` / `rounded-2xl`), interactive inputs/buttons (`rounded-lg` / `rounded-xl`), media transport buttons (`rounded-full` for circular 44px player actions). | Not needed |
+| 6 | Decorative elements | No | `src/**/*.{tsx,css}` | Audited for floating blobs, neon circles, decorative lines, or random background orbs. Zero ungrounded decorative graphics exist. | Not needed |
+| 7 | Generic AI illustrations | No | `src/components/` | Audited icon imports. Zero generic AI icons (`Brain`, `Bot`, `Sparkles`, `Wand`, `Cpu`) exist. All icons directly map to educational/player actions (`PenTool`, `Play`, `Pause`, `RotateCcw`, `Volume2`, `Keyboard`, `CheckCircle2`). | Not needed |
+| 8 | Excessive animations | No | `src/**/*.{tsx,css}` | Audited animation keyframes and transitions. Only purposeful pedagogical drawing animations and 150ms-200ms interactive transitions remain. Full `prefers-reduced-motion` compliance verified. | Not needed |
+| 9 | Excessive shadows/glows | No | `src/**/*.{tsx,css}` | Audited box-shadow classes. No neon glows or heavy `shadow-2xl` effects exist; all surfaces use subtle `shadow-xs` / `shadow-sm` or crisp 1px borders. | Not needed |
+| 10 | Generic typography | No | `src/app/globals.css`, `src/components/` | Typography employs Geist Sans with intentional weights, balanced line lengths (<80 chars), and monospace tabular figures (`font-variant-numeric: tabular-nums`) for all timers, clocks, and counters. | Not needed |
+| 11 | Repetitive sections | No | Application routes | Every section serves a unique functional role in the learning workflow (header, topic prompt, whiteboard stage, live captions, scrubbing dock, transcript/chat drawer, knowledge check). No repeating section templates exist. | Not needed |
+| 12 | Excessive badges | Yes | `src/app/page.tsx` | Removed superfluous decorative `"Pedagogical Studio"` pill badge next to the header title. Retained only the clean, authentic `"Whiteboard Tutor"` brandmark. | Fixed |
+| 13 | Artificial marketing copy | No | `src/app/`, `src/components/` | Copywriting audited. Replaced all marketing fluff with clear, direct, student-first language ("What concept would you like to explore?", "Synchronized whiteboard drawings & voice narration"). No exaggerated claims. | Not needed |
+| 14 | Lack of product personality | No | `src/components/whiteboard/` | Product personality is strongly established through university dry-erase whiteboard pedagogy: anodized aluminum bezel, marker tray rail, 24px SVG dot grid, authentic marker inks, and scene title cards. | Not needed |
+| 15 | Inconsistent visual details | Yes | `src/components/LessonApp.tsx` | **Removed the explicit AI model/voice attribution line (`Written live by gemini-3.1-flash-lite · Voice: Google Cloud TTS`) from the website UI** as requested. Standardized all notice buttons (retry/continue) to 44px minimum touch targets with WCAG AA focus rings. | Fixed |
+

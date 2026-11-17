@@ -29,7 +29,7 @@ import {
 import { TopicForm } from "./topic/TopicForm";
 import { ProgressSteps, type GenerationStage } from "./status/ProgressSteps";
 import { ErrorNotice } from "./status/ErrorNotice";
-import { ProvenanceNote, type VoiceSource } from "./status/ProvenanceNote";
+import type { VoiceSource } from "./status/ProvenanceNote";
 import { Whiteboard } from "./whiteboard/Whiteboard";
 import { PlayerControls } from "./player/PlayerControls";
 import { KnowledgeCheck } from "./check/KnowledgeCheck";
@@ -83,7 +83,7 @@ export function LessonApp({ audioRef }: LessonAppProps) {
   });
   const [currentError, setCurrentError] = useState<ClientError | Error | string | null>(null);
   const [isNoAudio, setIsNoAudio] = useState(false);
-  const [voice, setVoice] = useState<VoiceSource | undefined>(undefined);
+  const [, setVoice] = useState<VoiceSource | undefined>(undefined);
   const [restoreNotice, setRestoreNotice] = useState<string | null>(null);
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
@@ -482,14 +482,14 @@ export function LessonApp({ audioRef }: LessonAppProps) {
             <button
               type="button"
               onClick={retryAudio}
-              className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold cursor-pointer"
+              className="px-3.5 py-2 min-h-[44px] rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
             >
               Retry
             </button>
             <button
               type="button"
               onClick={continueWithoutAudio}
-              className="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold cursor-pointer"
+              className="px-3.5 py-2 min-h-[44px] rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold cursor-pointer flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
             >
               Continue without audio
             </button>
@@ -510,7 +510,7 @@ export function LessonApp({ audioRef }: LessonAppProps) {
           <button
             type="button"
             onClick={handleRetryNarration}
-            className="px-3.5 py-2 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold shadow-xs cursor-pointer min-h-[38px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+            className="px-4 py-2.5 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold shadow-xs cursor-pointer min-h-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
           >
             Try audio again
           </button>
@@ -530,7 +530,7 @@ export function LessonApp({ audioRef }: LessonAppProps) {
           {needsUserGesture && (
             <div
               data-testid="autoplay-overlay"
-              className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/70 backdrop-blur-xs text-white rounded-2xl"
+              className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/80 text-white rounded-2xl"
             >
               <button
                 type="button"
@@ -546,7 +546,6 @@ export function LessonApp({ audioRef }: LessonAppProps) {
 
         {/* Live Narration Caption Bar */}
         {isReady && <CaptionBar currentText={activeSegmentText} />}
-        {isReady && <ProvenanceNote model={lesson?.generatedBy.model} voice={isNoAudio ? "none" : voice} />}
 
         {/* Playback Controls */}
         {isReady && (
