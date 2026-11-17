@@ -501,7 +501,7 @@ export function LessonApp({ audioRef }: LessonAppProps) {
       {isNoAudio && isReady && (
         <div
           role="status"
-          className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-sm text-amber-800 dark:text-amber-200 max-w-2xl mx-auto w-full flex flex-wrap items-center justify-between gap-3"
+          className="p-4 rounded-xl bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/80 text-sm text-amber-900 dark:text-amber-200 max-w-2xl mx-auto w-full flex flex-wrap items-center justify-between gap-3 shadow-xs"
         >
           <span>
             Narration audio is unavailable right now. You can follow along with the transcript and
@@ -510,7 +510,7 @@ export function LessonApp({ audioRef }: LessonAppProps) {
           <button
             type="button"
             onClick={handleRetryNarration}
-            className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+            className="px-3.5 py-2 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold shadow-xs cursor-pointer min-h-[38px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
           >
             Try audio again
           </button>
@@ -518,7 +518,7 @@ export function LessonApp({ audioRef }: LessonAppProps) {
       )}
 
       {/* Whiteboard Canvas & Live Captions */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2.5">
         <div className="relative">
           <Whiteboard
             boardState={boardState}
@@ -530,12 +530,12 @@ export function LessonApp({ audioRef }: LessonAppProps) {
           {needsUserGesture && (
             <div
               data-testid="autoplay-overlay"
-              className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-xs text-white rounded-xl"
+              className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-900/70 backdrop-blur-xs text-white rounded-2xl"
             >
               <button
                 type="button"
                 onClick={() => void controller.play()}
-                className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all flex items-center gap-2 text-base cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none"
+                className="px-6 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold shadow-md transition-all flex items-center gap-2 text-base cursor-pointer min-h-[44px] focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:outline-none"
               >
                 <Play className="w-5 h-5 fill-current" />
                 <span>Press play to start</span>

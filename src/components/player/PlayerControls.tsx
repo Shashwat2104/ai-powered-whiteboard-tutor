@@ -43,7 +43,7 @@ export function PlayerControls({
 
   return (
     <div
-      className={`flex flex-col gap-3 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm ${className}`}
+      className={`flex flex-col gap-3 p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs ${className}`}
       aria-label="Lesson Playback Controls"
     >
       {/* Interactive Timeline Scrubbing Slider */}
@@ -57,16 +57,16 @@ export function PlayerControls({
 
       {/* Button Controls Toolbar */}
       <div className="flex items-center justify-between gap-3 pt-1">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-2.5">
           {/* Restart Button */}
           <button
             type="button"
             onClick={restart}
             disabled={disabled}
-            className="inline-flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+            className="inline-flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1"
             aria-label="Restart lesson from beginning"
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className="w-4 h-4 stroke-[2.2]" aria-hidden="true" />
           </button>
 
           {/* Rewind 10 Seconds */}
@@ -74,10 +74,10 @@ export function PlayerControls({
             type="button"
             onClick={handleBack10}
             disabled={disabled}
-            className="inline-flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+            className="inline-flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1"
             aria-label="Rewind 10 seconds"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-4 h-4 stroke-[2.2]" aria-hidden="true" />
           </button>
 
           {/* Primary Play / Pause / Replay Button */}
@@ -85,23 +85,23 @@ export function PlayerControls({
             <button
               type="button"
               onClick={replay}
-              className="inline-flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-md transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="inline-flex items-center justify-center w-12 h-12 min-w-[44px] min-h-[44px] rounded-xl bg-indigo-700 hover:bg-indigo-800 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white shadow-xs transition-transform active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
               aria-label="Replay lesson"
             >
-              <RotateCcw className="w-5 h-5" />
+              <RotateCcw className="w-5 h-5 stroke-[2.2]" aria-hidden="true" />
             </button>
           ) : (
             <button
               type="button"
               onClick={togglePlay}
               disabled={disabled}
-              className="inline-flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 text-white shadow-md transition-transform active:scale-95 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="inline-flex items-center justify-center w-12 h-12 min-w-[44px] min-h-[44px] rounded-xl bg-indigo-700 hover:bg-indigo-800 dark:bg-indigo-600 dark:hover:bg-indigo-500 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 text-white shadow-xs transition-transform active:scale-95 disabled:cursor-not-allowed cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
               aria-label={isPlaying ? "Pause lesson" : "Play lesson"}
             >
               {isPlaying ? (
-                <Pause className="w-5 h-5 fill-current" />
+                <Pause className="w-5 h-5 fill-current" aria-hidden="true" />
               ) : (
-                <Play className="w-5 h-5 fill-current ml-0.5" />
+                <Play className="w-5 h-5 fill-current ml-0.5" aria-hidden="true" />
               )}
             </button>
           )}
@@ -111,16 +111,26 @@ export function PlayerControls({
             type="button"
             onClick={handleForward10}
             disabled={disabled}
-            className="inline-flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+            className="inline-flex items-center justify-center w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1"
             aria-label="Forward 10 seconds"
           >
-            <RotateCw className="w-4 h-4" />
+            <RotateCw className="w-4 h-4 stroke-[2.2]" aria-hidden="true" />
           </button>
         </div>
 
         {/* State Indicator Pill */}
-        <div className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-          {mode === "playing" ? "Playing" : mode === "paused" ? "Paused" : mode === "ended" ? "Ended" : "Ready"}
+        <div className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 text-slate-700 dark:text-slate-300">
+          <span
+            className={`w-2 h-2 rounded-full ${
+              mode === "playing"
+                ? "bg-emerald-500 animate-pulse"
+                : mode === "paused"
+                ? "bg-amber-500"
+                : "bg-slate-400 dark:bg-slate-500"
+            }`}
+            aria-hidden="true"
+          />
+          <span>{mode === "playing" ? "Playing" : mode === "paused" ? "Paused" : mode === "ended" ? "Ended" : "Ready"}</span>
         </div>
       </div>
     </div>

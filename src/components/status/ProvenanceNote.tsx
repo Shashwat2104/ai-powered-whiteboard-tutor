@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import { Info } from "lucide-react";
 
 export type VoiceSource = "elevenlabs" | "google" | "none";
 
@@ -20,8 +20,11 @@ export function ProvenanceNote({ model, voice }: ProvenanceNoteProps) {
   if (!model || !voice) return null;
   const simulated = model.startsWith("fake-");
   return (
-    <p className="flex items-center justify-center gap-1.5 text-xs text-slate-600 dark:text-slate-400" data-testid="provenance">
-      <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
+    <p
+      className="flex items-center justify-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 font-medium py-1"
+      data-testid="provenance"
+    >
+      <Info className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" aria-hidden="true" />
       <span>
         {simulated ? "Simulated test lesson (fixed sample, not live AI)" : `Written live by ${model}`} · {VOICE_LABEL[voice]}
       </span>

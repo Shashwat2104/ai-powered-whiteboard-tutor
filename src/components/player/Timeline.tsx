@@ -71,11 +71,11 @@ export function Timeline({
             setDragValue(null);
             if (val[0] !== undefined) onSeek(val[0]);
           }}
-          className="relative flex items-center select-none touch-none w-full h-5 cursor-pointer disabled:cursor-not-allowed group"
+          className="relative flex items-center select-none touch-none w-full h-6 cursor-pointer disabled:cursor-not-allowed group"
           aria-label="Lesson Timeline"
         >
-          <Slider.Track className="bg-slate-200 dark:bg-slate-700 relative grow rounded-full h-1.5 group-hover:h-2 transition-all">
-            <Slider.Range className="absolute bg-blue-600 rounded-full h-full" />
+          <Slider.Track className="bg-slate-200 dark:bg-slate-700/80 relative grow rounded-full h-2 group-hover:h-2.5 transition-all">
+            <Slider.Range className="absolute bg-indigo-600 dark:bg-indigo-500 rounded-full h-full" />
 
             {/* Scene Tick Marks */}
             {durationSec > 0 &&
@@ -87,7 +87,7 @@ export function Timeline({
                     data-testid="scene-tick"
                     title={scene.title}
                     style={{ left: `${percent}%` }}
-                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-3 bg-slate-400 dark:bg-slate-500 rounded-xs hover:bg-blue-400 transition-colors pointer-events-auto"
+                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-3.5 bg-slate-400 dark:bg-slate-400 rounded-xs hover:bg-indigo-400 hover:scale-125 transition-all pointer-events-auto"
                   />
                 );
               })}
@@ -100,12 +100,12 @@ export function Timeline({
             aria-valuenow={Math.round(positionSec)}
             aria-valuemin={0}
             aria-valuemax={Math.round(durationSec)}
-            className="block w-4 h-4 bg-white dark:bg-slate-100 border-2 border-blue-600 rounded-full shadow-sm hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-transform"
+            className="block w-4.5 h-4.5 bg-white dark:bg-slate-100 border-2 border-indigo-600 dark:border-indigo-400 rounded-full shadow-xs hover:scale-115 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 transition-transform cursor-pointer"
           />
         </Slider.Root>
       </div>
 
-      <div className="flex justify-between items-center text-xs tabular-nums text-slate-500 dark:text-slate-400 px-0.5">
+      <div className="flex justify-between items-center text-xs font-mono font-medium tabular-nums text-slate-600 dark:text-slate-400 px-0.5">
         <span>{formatTime(displayTime)}</span>
         <span>{formatTime(durationSec)}</span>
       </div>
