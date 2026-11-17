@@ -146,12 +146,44 @@ describe("validateLessonSemantics", () => {
     const draft = withSegment(withSegment(validDraft(), 4, { actions: [] }), 5, { actions: [] });
     expectError(draft, "NO_VISUALS", "scenes[2]");
   });
+
+  it("DIM_WHOLE_ARRAY: dimming an array instead of its cells", () => {
+    expectError(patchAction(validDraft(), 2, 1, { target: "arr" } as Partial<VisualAction>), "DIM_WHOLE_ARRAY", "segments[2].actions[1]");
+  });
+
+  it("LATE_VISUAL: a segment whose only action fires at its end", () => {
+    const draft = withSegment(validDraft(), 2, { actions: [validDraft().segments[2]!.actions[4]!] });
+    expectError(draft, "LATE_VISUAL", "segments[2]");
+  });
+
+  it("LATE_VISUAL: a segment that draws nothing", () => {
+    expectError(withSegment(validDraft(), 3, { actions: [] }), "LATE_VISUAL", "segments[3]");
+  });
+
+  it("LATE_FIRST_VISUAL: the first element appears long after the lesson starts", () => {
+    expectError(patchAction(patchAction(validDraft(), 0, 0, { at: "end" }), 0, 1, { at: "end" }), "LATE_FIRST_VISUAL", "segments[0]");
+  });
+
+  it("skips pacing rules for a follow-up illustration", () => {
+    const issues = validateLessonSemantics(withSegment(validDraft(), 0, { actions: [] }), { illustration: true });
+    expect(issues.some((e) => e.code === "LATE_VISUAL" || e.code === "LATE_FIRST_VISUAL")).toBe(false);
+  });
 });
 
 describe("onlyCosmeticIssues", () => {
   const issue = (code: string) => ({ code, path: "p", message: "m" });
 
-  it.each(["NARRATION_LENGTH", "SEGMENT_LENGTH", "OVERLAP", "TEXT_TOO_LONG", "PHASE_ORDER", "NO_VISUALS"])("tolerates %s", (code) => {
+  it.each([
+    "NARRATION_LENGTH",
+    "SEGMENT_LENGTH",
+    "OVERLAP",
+    "TEXT_TOO_LONG",
+    "PHASE_ORDER",
+    "NO_VISUALS",
+    "DIM_WHOLE_ARRAY",
+    "LATE_VISUAL",
+    "LATE_FIRST_VISUAL",
+  ])("tolerates %s", (code) => {
     expect(onlyCosmeticIssues([issue(code)])).toBe(true);
   });
 

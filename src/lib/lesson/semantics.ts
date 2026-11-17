@@ -1,5 +1,5 @@
 import { baseId, cellIndex, estimateBox, insideBoard, overlapRatio, type Box } from "./layout";
-import { extractMarkers, wordCount } from "./markers";
+import { extractMarkers, wordCount, type MarkerInfo } from "./markers";
 import { CREATING_TYPES, PHASES, type LessonDraft, type VisualAction } from "./schema";
 
 export type SemanticCode =
@@ -19,7 +19,10 @@ export type SemanticCode =
   | "SCENE_COVERAGE"
   | "ANSWER_INDEX"
   | "SCENE_REF"
-  | "NO_VISUALS";
+  | "NO_VISUALS"
+  | "DIM_WHOLE_ARRAY"
+  | "LATE_VISUAL"
+  | "LATE_FIRST_VISUAL";
 
 export interface SemanticError {
   code: SemanticCode;
@@ -37,6 +40,10 @@ export const LIMITS = {
   boardMaxWords: 12,
   boardMaxChars: 80,
   overlapMax: 0.15,
+  /** Every segment must draw something by this fraction of its speech, so the board is not left still. */
+  firstTriggerMax: 0.6,
+  /** The lesson's first element must appear by this fraction of the first segment. */
+  firstVisualMax: 0.2,
 } as const;
 
 export type SemanticInput = Pick<LessonDraft, "segments" | "scenes" | "knowledgeChecks">;
@@ -124,6 +131,34 @@ function checkLengths(segments: Segments): SemanticError[] {
   return errors;
 }
 
+/** Where in a segment's speech an action fires: 0 is the first word, 1 is the end. */
+function firePosition(action: VisualAction, marks: readonly MarkerInfo[], spokenLength: number): number {
+  if (action.at === "start") return 0;
+  if (action.at === "end") return 1;
+  const mark = marks.find((m) => m.name === action.at);
+  return mark && spokenLength > 0 ? mark.offset / spokenLength : 0;
+}
+
+function checkPacing(segments: Segments): SemanticError[] {
+  const errors: SemanticError[] = [];
+  segments.forEach((segment, i) => {
+    const { marks, spokenText } = extractMarkers(segment.text);
+    const fired = segment.actions.map((action) => ({ action, at: firePosition(action, marks, spokenText.length) }));
+    const earliest = Math.min(...fired.map((f) => f.at));
+    if (earliest > LIMITS.firstTriggerMax) {
+      const why = fired.length === 0 ? "draws nothing" : `first draws at ${Math.round(earliest * 100)}% of its speech`;
+      errors.push(fail("LATE_VISUAL", `segments[${i}]`, `Segment ${segment.id} ${why}. Add or move an action so something appears in its first half (use "start" or an early marker).`));
+    }
+    if (i === 0) {
+      const firstCreating = Math.min(...fired.filter((f) => CREATING_TYPES.has(f.action.type)).map((f) => f.at));
+      if (firstCreating > LIMITS.firstVisualMax) {
+        errors.push(fail("LATE_FIRST_VISUAL", "segments[0]", `The first element must appear at "start" or on a marker in the first fifth of ${segment.id}, so the board is never empty as the lesson begins.`));
+      }
+    }
+  });
+  return errors;
+}
+
 /**
  * Problems that leave a lesson fully playable: every marker fires, every reference resolves and
  * every segment belongs to a scene. Only the look or the length is off.
@@ -135,6 +170,9 @@ const COSMETIC_CODES: ReadonlySet<string> = new Set<SemanticCode>([
   "TEXT_TOO_LONG",
   "PHASE_ORDER",
   "NO_VISUALS",
+  "DIM_WHOLE_ARRAY",
+  "LATE_VISUAL",
+  "LATE_FIRST_VISUAL",
 ]);
 
 /** True when every issue is cosmetic, so the lesson may be used if no cleaner version arrives. */
@@ -246,6 +284,9 @@ function checkAction(action: VisualAction, path: string, present: Map<string, Pr
   for (const ref of refTargets(action)) {
     if (!refIsValid(ref, action, present)) errors.push(fail("REF_UNKNOWN", path, `Reference ${ref} does not point to an element on the board`));
   }
+  if (action.type === "dim" && cellIndex(action.target) === null && present.get(baseId(action.target))?.action.type === "array") {
+    errors.push(fail("DIM_WHOLE_ARRAY", path, `Dim array cells one at a time (${action.target}[0], ${action.target}[1], ...); dimming the whole array makes all of it unreadable`));
+  }
 
   const box = estimateBox(action);
   if (box && !insideBoard(box)) errors.push(fail("OUT_OF_BOUNDS", path, "Element extends outside the 1600x900 board"));
@@ -300,7 +341,7 @@ function checkBoard(input: SemanticInput): SemanticError[] {
 export function validateLessonSemantics(input: SemanticInput, options: SemanticOptions = {}): SemanticError[] {
   const errors: SemanticError[] = [...checkIds(input), ...checkMarkers(input.segments)];
   if (!options.illustration) {
-    errors.push(...checkLengths(input.segments), ...checkPhases(input.segments), ...checkKnowledgeChecks(input));
+    errors.push(...checkLengths(input.segments), ...checkPacing(input.segments), ...checkPhases(input.segments), ...checkKnowledgeChecks(input));
   }
   const coverage = checkSceneCoverage(input.segments, input.scenes);
   errors.push(...coverage);

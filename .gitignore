@@ -54,6 +54,13 @@ GEMINI.md
 skills-lock.json
 .reticle*
 
+/.playwright-mcp/
+
+# documentation and reports (only README.md ships)
+/docs/
+*.md
+!README.md
+
 # test and tool output
 /playwright-report/
 /test-results/

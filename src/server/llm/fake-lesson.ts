@@ -17,8 +17,8 @@ export function validDraft(): LessonDraft {
         id: "s1",
         phase: "introduction",
         text:
-          "Imagine finding a name in a thick phone book. You would not read every page. You would open the middle, " +
-          "decide which half holds the name, and repeat. That clever habit is called [[m1]]binary search, and it is " +
+          "[[m1]]Imagine finding a name in a thick phone book. You would not read every page. You would open the middle, " +
+          "decide which half holds the name, and repeat. That clever habit is called binary search, and it is " +
           "surprisingly fast. Today we will see exactly how it works.",
         actions: [
           { id: "t1", type: "write", at: "m1", x: 400, y: 60, text: "Binary search", size: "title", color: "blue" },
